@@ -176,6 +176,7 @@ test('request should be defined in onSend Hook on post request with content type
   fastify.post('/', (request, reply) => {
     reply.send(200)
   })
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     fastify.server.unref()
     t.error(err)
@@ -207,6 +208,7 @@ test('request should be defined in onSend Hook on post request with content type
   fastify.post('/', (request, reply) => {
     reply.send(200)
   })
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     fastify.server.unref()
     t.error(err)
@@ -238,6 +240,7 @@ test('request should be defined in onSend Hook on options request with content t
   fastify.options('/', (request, reply) => {
     reply.send(200)
   })
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     fastify.server.unref()
     t.error(err)
@@ -260,10 +263,14 @@ test('request should respond with an error if an unserialized payload is sent in
 
   const fastify = require('../..')()
 
-  fastify.get('/', (request, reply) => {
-    reply.type('text/html')
-    return Promise.resolve(request.headers)
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (request, reply) => {
+      reply.type('text/html')
+      return Promise.resolve(request.headers)
+    });
+
+    done();
+  });
 
   fastify.inject({
     method: 'GET',

@@ -239,7 +239,7 @@ test('within an instance', t => {
     reply.send({ hello: 'world!' })
   })
 
-  fastify.register(function (instance, options, done) {
+  await fastify.register(function (instance, options, done) {
     fastify.addHook('onSend', function (req, reply, payload, done) {
       reply.header('x-onsend', 'yes')
       done()
@@ -876,7 +876,7 @@ test('reply.send(new NotFound()) should not invoke the 404 handler', t => {
     reply.send(new NotFound())
   })
 
-  fastify.register(function (instance, options, done) {
+  await fastify.register(function (instance, options, done) {
     instance.get('/not-found', function (req, reply) {
       reply.send(new NotFound())
     })
@@ -1455,7 +1455,7 @@ test('reply should use the right serializer in encapsulated context', t => {
     handler: (req, reply) => { reply.send({ foo: 'bar' }) }
   })
 
-  fastify.register(function (instance, opts, done) {
+  await fastify.register(function (instance, opts, done) {
     instance.route({
       method: 'GET',
       url: '/sub',
@@ -1469,7 +1469,7 @@ test('reply should use the right serializer in encapsulated context', t => {
     done()
   })
 
-  fastify.register(function (instance, opts, done) {
+  await fastify.register(function (instance, opts, done) {
     instance.route({
       method: 'GET',
       url: '/sub',
@@ -1519,7 +1519,7 @@ test('reply should use the right serializer in deep encapsulated context', t => 
     handler: (req, reply) => { reply.send({ foo: 'bar' }) }
   })
 
-  fastify.register(function (instance, opts, done) {
+  await fastify.register(function (instance, opts, done) {
     instance.route({
       method: 'GET',
       url: '/sub',

@@ -224,14 +224,18 @@ function testBeforeHandlerHook (hook) {
       reply.send({ this: 'is', my: 'error' })
     })
 
-    fastify.get('/', {
-      [hook]: async () => {
-        // eslint-disable-next-line no-throw-literal
-        throw myError
-      }
-    }, (req, reply) => {
-      t.fail('the handler must not be called')
-    })
+    fastify.register((instance, opts, done) => {
+      instance.get('/', {
+        [hook]: async () => {
+          // eslint-disable-next-line no-throw-literal
+          throw myError
+        }
+      }, (req, reply) => {
+        t.fail('the handler must not be called')
+      });
+
+      done();
+    });
 
     fastify.inject({
       url: '/',
@@ -247,14 +251,18 @@ function testBeforeHandlerHook (hook) {
     t.plan(3)
     const fastify = Fastify()
 
-    fastify.get('/', {
-      [hook]: async () => {
-        // eslint-disable-next-line no-throw-literal
-        throw { myError: 'kaboom', message: 'i am an error' }
-      }
-    }, (req, reply) => {
-      t.fail('the handler must not be called')
-    })
+    fastify.register((instance, opts, done) => {
+      instance.get('/', {
+        [hook]: async () => {
+          // eslint-disable-next-line no-throw-literal
+          throw { myError: 'kaboom', message: 'i am an error' }
+        }
+      }, (req, reply) => {
+        t.fail('the handler must not be called')
+      });
+
+      done();
+    });
 
     fastify.inject({
       url: '/',
@@ -395,13 +403,17 @@ test('preSerialization option should be able to modify the payload', t => {
   t.plan(3)
   const fastify = Fastify()
 
-  fastify.get('/only', {
-    preSerialization: (req, reply, payload, done) => {
-      done(null, { hello: 'another world' })
-    }
-  }, (req, reply) => {
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/only', {
+      preSerialization: (req, reply, payload, done) => {
+        done(null, { hello: 'another world' })
+      }
+    }, (req, reply) => {
+      reply.send({ hello: 'world' })
+    });
+
+    done();
+  });
 
   fastify.inject({
     method: 'GET',
@@ -502,14 +514,19 @@ test('onTimeout on route', t => {
   t.plan(4)
   const fastify = Fastify({ connectionTimeout: 500 })
 
-  fastify.get('/timeout', {
-    async  handler (request, reply) { },
-    onTimeout (request, reply, done) {
-      t.pass('onTimeout called')
-      done()
-    }
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/timeout', {
+      async  handler (request, reply) { },
+      onTimeout (request, reply, done) {
+        t.pass('onTimeout called')
+        done()
+      }
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, (err, address) => {
     t.error(err)
     t.teardown(() => fastify.close())
@@ -531,16 +548,18 @@ test('onError on route', t => {
 
   const err = new Error('kaboom')
 
-  fastify.get('/',
-    {
+  fastify.register((instance, opts, done) => {
+    instance.get('/', {
       onError (request, reply, error, done) {
         t.match(error, err)
         done()
       }
-    },
-    (req, reply) => {
+    }, (req, reply) => {
       reply.send(err)
-    })
+    });
+
+    done();
+  });
 
   fastify.inject('/', (err, res) => {
     t.error(err)

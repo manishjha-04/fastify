@@ -67,7 +67,7 @@ test('encapsulated 500', t => {
     reply.send(new Error('kaboom'))
   })
 
-  fastify.register(function (f, opts, done) {
+  await fastify.register(function (f, opts, done) {
     f.get('/', function (req, reply) {
       reply.send(new Error('kaboom'))
     })

@@ -12,12 +12,12 @@ test('Prefix options should add a prefix for all the routes inside a register / 
     reply.send({ route: '/first' })
   })
 
-  fastify.register(function (fastify, opts, done) {
+  await fastify.register(function (fastify, opts, done) {
     fastify.get('/first', (req, reply) => {
       reply.send({ route: '/v1/first' })
     })
 
-    fastify.register(function (fastify, opts, done) {
+    await fastify.register(function (fastify, opts, done) {
       fastify.get('/first', (req, reply) => {
         reply.send({ route: '/v1/v2/first' })
       })
@@ -56,7 +56,7 @@ test('Prefix options should add a prefix for all the routes inside a register / 
   t.plan(4)
   const fastify = Fastify()
 
-  fastify.register(function (fastify, opts, done) {
+  await fastify.register(function (fastify, opts, done) {
     fastify.get('/first', (req, reply) => {
       reply.send({ route: '/v1/first' })
     })
@@ -89,7 +89,7 @@ test('Prefix options should add a prefix for all the chained routes inside a reg
 
   const fastify = Fastify()
 
-  fastify.register(function (fastify, opts, done) {
+  await fastify.register(function (fastify, opts, done) {
     fastify
       .get('/first', (req, reply) => {
         reply.send({ route: '/v1/first' })
@@ -121,7 +121,7 @@ test('Prefix should support parameters as well', t => {
   t.plan(2)
   const fastify = Fastify()
 
-  fastify.register(function (fastify, opts, done) {
+  await fastify.register(function (fastify, opts, done) {
     fastify.get('/hello', (req, reply) => {
       reply.send({ id: req.params.id })
     })
@@ -141,7 +141,7 @@ test('Prefix should support /', t => {
   t.plan(2)
   const fastify = Fastify()
 
-  fastify.register(function (fastify, opts, done) {
+  await fastify.register(function (fastify, opts, done) {
     fastify.get('/', (req, reply) => {
       reply.send({ hello: 'world' })
     })
@@ -161,7 +161,7 @@ test('Prefix without /', t => {
   t.plan(2)
   const fastify = Fastify()
 
-  fastify.register(function (fastify, opts, done) {
+  await fastify.register(function (fastify, opts, done) {
     fastify.get('/', (req, reply) => {
       reply.send({ hello: 'world' })
     })
@@ -181,7 +181,7 @@ test('Prefix with trailing /', t => {
   t.plan(6)
   const fastify = Fastify()
 
-  fastify.register(function (fastify, opts, done) {
+  await fastify.register(function (fastify, opts, done) {
     fastify.get('/route1', (req, reply) => {
       reply.send({ hello: 'world1' })
     })
@@ -189,7 +189,7 @@ test('Prefix with trailing /', t => {
       reply.send({ hello: 'world2' })
     })
 
-    fastify.register(function (fastify, opts, done) {
+    await fastify.register(function (fastify, opts, done) {
       fastify.get('/route3', (req, reply) => {
         reply.send({ hello: 'world3' })
       })
@@ -228,10 +228,10 @@ test('Prefix works multiple levels deep', t => {
   t.plan(2)
   const fastify = Fastify()
 
-  fastify.register(function (fastify, opts, done) {
-    fastify.register(function (fastify, opts, done) {
-      fastify.register(function (fastify, opts, done) {
-        fastify.register(function (fastify, opts, done) {
+  await fastify.register(function (fastify, opts, done) {
+    await fastify.register(function (fastify, opts, done) {
+      await fastify.register(function (fastify, opts, done) {
+        await fastify.register(function (fastify, opts, done) {
           fastify.get('/', (req, reply) => {
             reply.send({ hello: 'world' })
           })
@@ -261,7 +261,7 @@ test('Different register - encapsulation check', t => {
     reply.send({ route: '/first' })
   })
 
-  fastify.register(function (instance, opts, done) {
+  await fastify.register(function (instance, opts, done) {
     instance.register(function (f, opts, done) {
       f.get('/', (req, reply) => {
         reply.send({ route: '/v1/v2' })
@@ -271,7 +271,7 @@ test('Different register - encapsulation check', t => {
     done()
   }, { prefix: '/v1' })
 
-  fastify.register(function (instance, opts, done) {
+  await fastify.register(function (instance, opts, done) {
     instance.register(function (f, opts, done) {
       f.get('/', (req, reply) => {
         reply.send({ route: '/v3/v4' })
@@ -302,7 +302,7 @@ test('Can retrieve prefix within encapsulated instances', t => {
   t.plan(4)
   const fastify = Fastify()
 
-  fastify.register(function (instance, opts, done) {
+  await fastify.register(function (instance, opts, done) {
     instance.get('/one', function (req, reply) {
       reply.send(instance.prefix)
     })
@@ -338,7 +338,7 @@ test('matches both /prefix and /prefix/ with a / route', t => {
   t.plan(4)
   const fastify = Fastify()
 
-  fastify.register(function (fastify, opts, done) {
+  await fastify.register(function (fastify, opts, done) {
     fastify.get('/', (req, reply) => {
       reply.send({ hello: 'world' })
     })
@@ -367,7 +367,7 @@ test('prefix "/prefix/" does not match "/prefix" with a / route', t => {
   t.plan(4)
   const fastify = Fastify()
 
-  fastify.register(function (fastify, opts, done) {
+  await fastify.register(function (fastify, opts, done) {
     fastify.get('/', (req, reply) => {
       reply.send({ hello: 'world' })
     })
@@ -398,7 +398,7 @@ test('matches both /prefix and /prefix/ with a / route - ignoreTrailingSlash: tr
     ignoreTrailingSlash: true
   })
 
-  fastify.register(function (fastify, opts, done) {
+  await fastify.register(function (fastify, opts, done) {
     fastify.get('/', (req, reply) => {
       reply.send({ hello: 'world' })
     })
@@ -429,7 +429,7 @@ test('matches both /prefix and /prefix/  with a / route - prefixTrailingSlash: "
     ignoreTrailingSlash: false
   })
 
-  fastify.register(function (fastify, opts, done) {
+  await fastify.register(function (fastify, opts, done) {
     fastify.route({
       method: 'GET',
       url: '/',
@@ -465,7 +465,7 @@ test('returns 404 status code with /prefix/ and / route - prefixTrailingSlash: "
     ignoreTrailingSlash: true
   })
 
-  fastify.register(function (fastify, opts, done) {
+  await fastify.register(function (fastify, opts, done) {
     fastify.route({
       method: 'GET',
       url: '/',
@@ -496,7 +496,7 @@ test('matches only /prefix  with a / route - prefixTrailingSlash: "no-slash", ig
     ignoreTrailingSlash: false
   })
 
-  fastify.register(function (fastify, opts, done) {
+  await fastify.register(function (fastify, opts, done) {
     fastify.route({
       method: 'GET',
       url: '/',
@@ -532,7 +532,7 @@ test('matches only /prefix/  with a / route - prefixTrailingSlash: "slash", igno
     ignoreTrailingSlash: false
   })
 
-  fastify.register(function (fastify, opts, done) {
+  await fastify.register(function (fastify, opts, done) {
     fastify.route({
       method: 'GET',
       url: '/',
@@ -569,7 +569,7 @@ test('calls onRoute only once when prefixing', async t => {
   })
 
   let onRouteCalled = 0
-  fastify.register(function (fastify, opts, next) {
+  await fastify.register(function (fastify, opts, next) {
     fastify.addHook('onRoute', () => {
       onRouteCalled++
     })

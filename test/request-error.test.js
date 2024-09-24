@@ -243,7 +243,7 @@ test('encapsulated error handler binding', t => {
 
   const fastify = Fastify()
 
-  fastify.register(function (app, opts, done) {
+  await fastify.register(function (app, opts, done) {
     app.decorate('hello', 'world')
     t.equal(app.hello, 'world')
     app.post('/', function (req, reply) {

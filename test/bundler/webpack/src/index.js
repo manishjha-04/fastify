@@ -1,7 +1,10 @@
 const fastify = require('../../../../')()
-// Declare a route
-fastify.get('/', function (request, reply) {
-  reply.send({ hello: 'world' })
-})
+fastify.register((instance, opts, done) => {
+  instance.get('/', function (request, reply) {
+    reply.send({ hello: 'world' })
+  });
+
+  done();
+});
 
 module.exports = fastify

@@ -19,9 +19,13 @@ test('Should emit a warning when accessing request.req instead of request.raw', 
 
   const fastify = Fastify()
 
-  fastify.get('/', (request, reply) => {
-    reply.send(request.req.method + request.req.method)
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (request, reply) => {
+      reply.send(request.req.method + request.req.method)
+    });
+
+    done();
+  });
 
   fastify.inject({
     method: 'GET',
@@ -44,9 +48,13 @@ test('Should emit a warning when accessing reply.res instead of reply.raw', t =>
 
   const fastify = Fastify()
 
-  fastify.get('/', (request, reply) => {
-    reply.send(reply.res.statusCode + reply.res.statusCode)
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (request, reply) => {
+      reply.send(reply.res.statusCode + reply.res.statusCode)
+    });
+
+    done();
+  });
 
   fastify.inject({
     method: 'GET',
@@ -77,6 +85,7 @@ test('Should emit a warning when using two arguments Content Type Parser instead
     reply.send(request.body)
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
 
@@ -111,10 +120,15 @@ test('Should emit a warning when using payload less preParsing hook', t => {
     done()
   })
 
-  fastify.get('/', (request, reply) => {
-    reply.send('OK')
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (request, reply) => {
+      reply.send('OK')
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
 
@@ -152,9 +166,13 @@ test('Should emit a warning when accessing request.connection instead of request
 
   const fastify = Fastify()
 
-  fastify.get('/', (request, reply) => {
-    reply.send(request.connection)
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (request, reply) => {
+      reply.send(request.connection)
+    });
+
+    done();
+  });
 
   fastify.inject({
     method: 'GET',

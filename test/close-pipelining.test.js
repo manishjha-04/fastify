@@ -10,11 +10,16 @@ test('Should return 503 while closing - pipelining', t => {
     return503OnClosing: true
   })
 
-  fastify.get('/', (req, reply) => {
-    fastify.close()
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (req, reply) => {
+      fastify.close()
+      reply.send({ hello: 'world' })
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, async err => {
     t.error(err)
 
@@ -43,11 +48,16 @@ test('Should not return 503 while closing - pipelining - return503OnClosing', t 
     return503OnClosing: false
   })
 
-  fastify.get('/', (req, reply) => {
-    fastify.close()
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (req, reply) => {
+      fastify.close()
+      reply.send({ hello: 'world' })
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
 

@@ -24,6 +24,7 @@ test('contentTypeParser should add a custom async parser', t => {
     return res
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
 
@@ -88,6 +89,7 @@ test('contentTypeParser should add a custom async parser - deprecated syntax', t
     return res
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
 

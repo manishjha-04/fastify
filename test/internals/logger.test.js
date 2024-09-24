@@ -15,11 +15,16 @@ test('The logger should add a unique id for every request', t => {
   const ids = []
 
   const fastify = Fastify()
-  fastify.get('/', (req, reply) => {
-    t.ok(req.id)
-    reply.send({ id: req.id })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (req, reply) => {
+      t.ok(req.id)
+      reply.send({ id: req.id })
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     const queue = new Queue()
@@ -48,11 +53,16 @@ test('The logger should add a unique id for every request', t => {
 
 test('The logger should reuse request id header for req.id', t => {
   const fastify = Fastify()
-  fastify.get('/', (req, reply) => {
-    t.ok(req.id)
-    reply.send({ id: req.id })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (req, reply) => {
+      t.ok(req.id)
+      reply.send({ id: req.id })
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
 

@@ -24,6 +24,7 @@ test('listen accepts a callback', t => {
   t.plan(2)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen((err) => {
     t.equal(fastify.server.address().address, localhost)
     t.error(err)
@@ -34,6 +35,7 @@ test('listen accepts a port and a callback', t => {
   t.plan(2)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, (err) => {
     t.equal(fastify.server.address().address, localhost)
     t.error(err)
@@ -44,6 +46,7 @@ test('listen accepts a port and a callback with (err, address)', t => {
   t.plan(2)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, (err, address) => {
     t.equal(address, `http://${localhostForURL}:${fastify.server.address().port}`)
     t.error(err)
@@ -54,6 +57,7 @@ test('listen accepts a port, address, and callback', t => {
   t.plan(1)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, localhost, (err) => {
     t.error(err)
   })
@@ -63,6 +67,7 @@ test('listen accepts options and a callback', t => {
   t.plan(1)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen({
     port: 0,
     host: 'localhost',
@@ -80,6 +85,7 @@ test('listen accepts options, backlog and a callback', t => {
   t.plan(1)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen({
     port: 0,
     host: 'localhost'
@@ -92,6 +98,7 @@ test('listen accepts a port, address and a callback with (err, address)', t => {
   t.plan(2)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, localhost, (err, address) => {
     t.equal(address, `http://${localhostForURL}:${fastify.server.address().port}`)
     t.error(err)
@@ -102,6 +109,7 @@ test('listen accepts a port, address, backlog and callback', t => {
   t.plan(1)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, localhost, 511, (err) => {
     t.error(err)
   })
@@ -111,6 +119,7 @@ test('listen accepts a port, address, backlog and callback with (err, address)',
   t.plan(2)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, localhost, 511, (err, address) => {
     t.equal(address, `http://${localhostForURL}:${fastify.server.address().port}`)
     t.error(err)
@@ -153,8 +162,10 @@ test('double listen errors', t => {
   t.plan(3)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, (err) => {
     t.error(err)
+    // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
     fastify.listen(fastify.server.address().port, (err, address) => {
       t.equal(address, null)
       t.ok(err)
@@ -166,9 +177,11 @@ test('double listen errors callback with (err, address)', t => {
   t.plan(4)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, (err1, address1) => {
     t.equal(address1, `http://${localhostForURL}:${fastify.server.address().port}`)
     t.error(err1)
+    // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
     fastify.listen(fastify.server.address().port, (err2, address2) => {
       t.equal(address2, null)
       t.ok(err2)
@@ -180,6 +193,7 @@ test('listen twice on the same port', t => {
   t.plan(4)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, (err1, address1) => {
     t.equal(address1, `http://${localhostForURL}:${fastify.server.address().port}`)
     t.error(err1)
@@ -196,6 +210,7 @@ test('listen twice on the same port callback with (err, address)', t => {
   t.plan(4)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, (err1, address1) => {
     const _port = fastify.server.address().port
     t.equal(address1, `http://${localhostForURL}:${_port}`)
@@ -221,6 +236,7 @@ if (os.platform() !== 'win32') {
       fs.unlinkSync(sockFile)
     } catch (e) { }
 
+    // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
     fastify.listen(sockFile, (err, address) => {
       t.error(err)
       t.equal(sockFile, fastify.server.address())
@@ -233,6 +249,7 @@ test('listen without callback (port zero)', t => {
   t.plan(1)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0)
     .then(() => {
       t.equal(fastify.server.address().address, localhost)
@@ -243,6 +260,7 @@ test('listen without callback (port not given)', t => {
   t.plan(1)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen()
     .then(() => {
       t.equal(fastify.server.address().address, localhost)
@@ -253,6 +271,7 @@ test('listen null without callback with (address)', t => {
   t.plan(1)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(null)
     .then(address => {
       t.equal(address, `http://${localhostForURL}:${fastify.server.address().port}`)
@@ -263,6 +282,7 @@ test('listen without port without callback with (address)', t => {
   t.plan(1)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen()
     .then(address => {
       t.equal(address, `http://${localhostForURL}:${fastify.server.address().port}`)
@@ -273,6 +293,7 @@ test('listen with undefined without callback with (address)', t => {
   t.plan(1)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(undefined)
     .then(address => {
       t.equal(address, `http://${localhostForURL}:${fastify.server.address().port}`)
@@ -283,6 +304,7 @@ test('listen without callback with (address)', t => {
   t.plan(1)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0)
     .then(address => {
       t.equal(address, `http://${localhostForURL}:${fastify.server.address().port}`)
@@ -293,8 +315,10 @@ test('double listen without callback rejects', t => {
   t.plan(1)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0)
     .then(() => {
+      // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
       fastify.listen(0)
         .catch(err => {
           t.ok(err)
@@ -307,9 +331,11 @@ test('double listen without callback with (address)', t => {
   t.plan(2)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0)
     .then(address => {
       t.equal(address, `http://${localhostForURL}:${fastify.server.address().port}`)
+      // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
       fastify.listen(0)
         .catch(err => {
           t.ok(err)
@@ -323,6 +349,7 @@ test('listen twice on the same port without callback rejects', t => {
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0)
     .then(() => {
       const s2 = Fastify()
@@ -339,6 +366,7 @@ test('listen twice on the same port without callback rejects with (address)', t 
   t.plan(2)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0)
     .then(address => {
       const s2 = Fastify()
@@ -355,11 +383,14 @@ test('listen twice on the same port without callback rejects with (address)', t 
 test('listen on invalid port without callback rejects', t => {
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
-  return fastify.listen(-1)
-    .catch(err => {
-      t.ok(err)
-      return true
-    })
+  return (
+    // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
+    fastify.listen(-1)
+      .catch(err => {
+        t.ok(err)
+        return true
+      })
+  );
 })
 
 test('listen logs the port as info', t => {
@@ -372,6 +403,7 @@ test('listen logs the port as info', t => {
     msgs.push(msg)
   }
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0)
     .then(() => {
       t.ok(/http:\/\//.test(msgs[0]))
@@ -382,7 +414,8 @@ test('listen when firstArg is string(pipe) and without backlog', async t => {
   t.plan(1)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
-  const address = await fastify.listen('\\\\.\\pipe\\testPipe')
+  const address = await // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
+  fastify.listen('\\\\.\\pipe\\testPipe')
   t.equal(address, '\\\\.\\pipe\\testPipe')
 })
 
@@ -390,6 +423,7 @@ test('listen when firstArg is string(pipe) and with backlog', async t => {
   t.plan(1)
   const fastify = Fastify()
   t.teardown(fastify.close.bind(fastify))
-  const address = await fastify.listen('\\\\.\\pipe\\testPipe', 511)
+  const address = await // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
+  fastify.listen('\\\\.\\pipe\\testPipe', 511)
   t.equal(address, '\\\\.\\pipe\\testPipe')
 })

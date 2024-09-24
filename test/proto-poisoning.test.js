@@ -15,6 +15,7 @@ test('proto-poisoning error', t => {
     t.fail('handler should not be called')
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, function (err) {
     t.error(err)
 
@@ -41,6 +42,7 @@ test('proto-poisoning remove', t => {
     reply.send({ ok: true })
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, function (err) {
     t.error(err)
 
@@ -67,6 +69,7 @@ test('proto-poisoning ignore', t => {
     reply.send({ ok: true })
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, function (err) {
     t.error(err)
 
@@ -92,6 +95,7 @@ test('constructor-poisoning error (default in v3)', t => {
     reply.send('ok')
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, function (err) {
     t.error(err)
 
@@ -117,6 +121,7 @@ test('constructor-poisoning error', t => {
     t.fail('handler should not be called')
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, function (err) {
     t.error(err)
 
@@ -143,6 +148,7 @@ test('constructor-poisoning remove', t => {
     reply.send({ ok: true })
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, function (err) {
     t.error(err)
 

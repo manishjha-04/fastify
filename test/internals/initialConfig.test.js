@@ -261,10 +261,14 @@ test('Should not have issues when passing stream options to Pino.js', t => {
     t.fail()
   }
 
-  fastify.get('/', function (req, reply) {
-    t.ok(req.log)
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (req, reply) {
+      t.ok(req.log)
+      reply.send({ hello: 'world' })
+    });
+
+    done();
+  });
 
   stream.once('data', listenAtLogLine => {
     t.ok(listenAtLogLine, 'listen at log message is ok')
@@ -287,6 +291,7 @@ test('Should not have issues when passing stream options to Pino.js', t => {
     })
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.server.unref()

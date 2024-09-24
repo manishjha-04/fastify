@@ -12,7 +12,7 @@ const fakeTimer = require('@sinonjs/fake-timers')
 test('require a plugin', t => {
   t.plan(1)
   const fastify = Fastify()
-  fastify.register(require('./plugin.helper'))
+  await fastify.register(require('./plugin.helper'))
   fastify.ready(() => {
     t.ok(fastify.test)
   })
@@ -23,7 +23,7 @@ test('plugin metadata - ignore prefix', t => {
   const fastify = Fastify()
 
   plugin[Symbol.for('skip-override')] = true
-  fastify.register(plugin, { prefix: 'foo' })
+  await fastify.register(plugin, { prefix: 'foo' })
 
   fastify.inject({
     method: 'GET',
@@ -45,13 +45,13 @@ test('plugin metadata - naming plugins', async t => {
   t.plan(2)
   const fastify = Fastify()
 
-  fastify.register(require('./plugin.name.display'))
-  fastify.register(function (fastify, opts, done) {
+  await fastify.register(require('./plugin.name.display'))
+  await fastify.register(function (fastify, opts, done) {
     // one line
     t.equal(fastify.pluginName, 'function (fastify, opts, done) { -- // one line')
     done()
   })
-  fastify.register(function fooBar (fastify, opts, done) {
+  await fastify.register(function fooBar (fastify, opts, done) {
     t.equal(fastify.pluginName, 'fooBar')
     done()
   })
@@ -63,7 +63,7 @@ test('fastify.register with fastify-plugin should not encapsulate his code', t =
   t.plan(10)
   const fastify = Fastify()
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.register(fp((i, o, n) => {
       i.decorate('test', () => {})
       t.ok(i.test)
@@ -109,7 +109,7 @@ test('fastify.register with fastify-plugin should provide access to external fas
   t.plan(22)
   const fastify = Fastify()
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.register(fp((i, o, n) => {
       i.decorate('global', () => {})
       t.ok(i.global)
@@ -199,9 +199,9 @@ test('fastify.register with fastify-plugin registers root level plugins', t => {
     done()
   }
 
-  fastify.register(fp(rootPlugin))
+  await fastify.register(fp(rootPlugin))
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     t.ok(instance.test)
     instance.register(fp(innerPlugin))
 
@@ -253,7 +253,7 @@ test('check dependencies - should not throw', t => {
   t.plan(12)
   const fastify = Fastify()
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.register(fp((i, o, n) => {
       i.decorate('test', () => {})
       t.ok(i.test)
@@ -305,7 +305,7 @@ test('check dependencies - should throw', t => {
   t.plan(12)
   const fastify = Fastify()
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.register(fp((i, o, n) => {
       try {
         i.decorate('otherTest', () => {}, ['test'])
@@ -357,20 +357,20 @@ test('set the plugin name based on the plugin displayName symbol', t => {
   t.plan(5)
   const fastify = Fastify()
 
-  fastify.register(fp((fastify, opts, done) => {
+  await fastify.register(fp((fastify, opts, done) => {
     t.equal(fastify.pluginName, 'plugin-A')
-    fastify.register(fp((fastify, opts, done) => {
+    await fastify.register(fp((fastify, opts, done) => {
       t.equal(fastify.pluginName, 'plugin-A -> plugin-AB')
       done()
     }, { name: 'plugin-AB' }))
-    fastify.register(fp((fastify, opts, done) => {
+    await fastify.register(fp((fastify, opts, done) => {
       t.equal(fastify.pluginName, 'plugin-A -> plugin-AB -> plugin-AC')
       done()
     }, { name: 'plugin-AC' }))
     done()
   }, { name: 'plugin-A' }))
 
-  fastify.register(fp((fastify, opts, done) => {
+  await fastify.register(fp((fastify, opts, done) => {
     t.equal(fastify.pluginName, 'plugin-A -> plugin-AB -> plugin-AC -> plugin-B')
     done()
   }, { name: 'plugin-B' }))
@@ -385,14 +385,14 @@ test('plugin name will change when using no encapsulation', t => {
   t.plan(5)
   const fastify = Fastify()
 
-  fastify.register(fp((fastify, opts, done) => {
+  await fastify.register(fp((fastify, opts, done) => {
     // store it in a different variable will hold the correct name
     const pluginName = fastify.pluginName
-    fastify.register(fp((fastify, opts, done) => {
+    await fastify.register(fp((fastify, opts, done) => {
       t.equal(fastify.pluginName, 'plugin-A -> plugin-AB')
       done()
     }, { name: 'plugin-AB' }))
-    fastify.register(fp((fastify, opts, done) => {
+    await fastify.register(fp((fastify, opts, done) => {
       t.equal(fastify.pluginName, 'plugin-A -> plugin-AB -> plugin-AC')
       done()
     }, { name: 'plugin-AC' }))
@@ -427,9 +427,9 @@ test('set the plugin name based on the plugin function name', t => {
   t.plan(5)
   const fastify = Fastify()
 
-  fastify.register(function myPluginA (fastify, opts, done) {
+  await fastify.register(function myPluginA (fastify, opts, done) {
     t.equal(fastify.pluginName, 'myPluginA')
-    fastify.register(function myPluginAB (fastify, opts, done) {
+    await fastify.register(function myPluginAB (fastify, opts, done) {
       t.equal(fastify.pluginName, 'myPluginAB')
       done()
     })
@@ -440,7 +440,7 @@ test('set the plugin name based on the plugin function name', t => {
     done()
   })
 
-  fastify.register(function myPluginB (fastify, opts, done) {
+  await fastify.register(function myPluginB (fastify, opts, done) {
     t.equal(fastify.pluginName, 'myPluginB')
     done()
   })
@@ -455,11 +455,11 @@ test('approximate a plugin name when no meta data is available', t => {
   t.plan(7)
   const fastify = Fastify()
 
-  fastify.register((fastify, opts, done) => {
+  await fastify.register((fastify, opts, done) => {
     // A
     t.equal(fastify.pluginName.startsWith('(fastify, opts, done)'), true)
     t.equal(fastify.pluginName.includes('// A'), true)
-    fastify.register((fastify, opts, done) => {
+    await fastify.register((fastify, opts, done) => {
       // B
       t.equal(fastify.pluginName.startsWith('(fastify, opts, done)'), true)
       t.equal(fastify.pluginName.includes('// B'), true)
@@ -482,9 +482,9 @@ test('approximate a plugin name also when fastify-plugin has no meta data', t =>
   t.plan(4)
   const fastify = Fastify()
 
-  fastify.register(fp((fastify, opts, done) => {
+  await fastify.register(fp((fastify, opts, done) => {
     t.match(fastify.pluginName, /plugin\.test/)
-    fastify.register(fp(function B (fastify, opts, done) {
+    await fastify.register(fp(function B (fastify, opts, done) {
       // function has name
       t.match(fastify.pluginName, /plugin\.test-auto-\d+ -> B/)
       done()
@@ -505,7 +505,7 @@ test('plugin encapsulation', t => {
   t.plan(10)
   const fastify = Fastify()
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.register(fp((i, o, n) => {
       i.decorate('test', 'first')
       n()
@@ -518,7 +518,7 @@ test('plugin encapsulation', t => {
     done()
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.register(fp((i, o, n) => {
       i.decorate('test', 'second')
       n()
@@ -565,7 +565,7 @@ test('if a plugin raises an error and there is not a callback to handle it, the 
   t.plan(2)
   const fastify = Fastify()
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     done(new Error('err'))
   })
 
@@ -587,9 +587,9 @@ test('add hooks after route declaration', t => {
     })
     setImmediate(done)
   }
-  fastify.register(fp(plugin))
+  await fastify.register(fp(plugin))
 
-  fastify.register((instance, options, done) => {
+  await fastify.register((instance, options, done) => {
     instance.addHook('preHandler', function b (req, res, done) {
       req.check.hook2 = true
       done()
@@ -633,15 +633,15 @@ test('nested plugins', t => {
 
   t.teardown(fastify.close.bind(fastify))
 
-  fastify.register(function (fastify, opts, done) {
-    fastify.register((fastify, opts, done) => {
+  await fastify.register(function (fastify, opts, done) {
+    await fastify.register((fastify, opts, done) => {
       fastify.get('/', function (req, reply) {
         reply.send('I am child 1')
       })
       done()
     }, { prefix: '/child1' })
 
-    fastify.register((fastify, opts, done) => {
+    await fastify.register((fastify, opts, done) => {
       fastify.get('/', function (req, reply) {
         reply.send('I am child 2')
       })
@@ -679,7 +679,7 @@ test('nested plugins awaited', t => {
 
   t.teardown(fastify.close.bind(fastify))
 
-  fastify.register(async function wrap (fastify, opts) {
+  await fastify.register(async function wrap (fastify, opts) {
     await fastify.register(async function child1 (fastify, opts) {
       fastify.get('/', function (req, reply) {
         reply.send('I am child 1')
@@ -731,7 +731,7 @@ test('plugin metadata - decorators', t => {
     }
   }
 
-  fastify.register(plugin)
+  await fastify.register(plugin)
 
   fastify.ready(() => {
     t.ok(fastify.plugin)
@@ -759,7 +759,7 @@ test('plugin metadata - decorators - should throw', t => {
     }
   }
 
-  fastify.register(plugin)
+  await fastify.register(plugin)
   fastify.ready((err) => {
     t.equal(err.message, "The decorator 'plugin1' is not present in Request")
   })
@@ -787,7 +787,7 @@ test('plugin metadata - decorators - should throw with plugin name', t => {
     }
   }
 
-  fastify.register(plugin)
+  await fastify.register(plugin)
   fastify.ready((err) => {
     t.equal(err.message, "The decorator 'plugin1' required by 'the-plugin' is not present in Request")
   })
@@ -812,8 +812,8 @@ test('plugin metadata - dependencies', t => {
     dependencies: ['plugin']
   }
 
-  fastify.register(dependency)
-  fastify.register(plugin)
+  await fastify.register(dependency)
+  await fastify.register(plugin)
 
   fastify.ready(() => {
     t.pass('everything right')
@@ -842,8 +842,8 @@ test('plugin metadata - dependencies (nested)', t => {
     dependencies: ['plugin']
   }
 
-  fastify.register(dependency)
-  fastify.register(plugin)
+  await fastify.register(dependency)
+  await fastify.register(plugin)
 
   fastify.ready(() => {
     t.pass('everything right')
@@ -868,7 +868,7 @@ test('pluginTimeout', t => {
   const fastify = Fastify({
     pluginTimeout: 10
   })
-  fastify.register(function (app, opts, done) {
+  await fastify.register(function (app, opts, done) {
     // to no call done on purpose
   })
   fastify.ready((err) => {
@@ -882,7 +882,7 @@ test('pluginTimeout default', t => {
   const clock = fakeTimer.install()
 
   const fastify = Fastify()
-  fastify.register(function (app, opts, done) {
+  await fastify.register(function (app, opts, done) {
     // default time elapsed without calling done
     clock.tick(10000)
   })
@@ -905,7 +905,7 @@ test('plugin metadata - version', t => {
     fastify: '2.0.0'
   }
 
-  fastify.register(plugin)
+  await fastify.register(plugin)
 
   fastify.ready(() => {
     t.pass('everything right')
@@ -926,7 +926,7 @@ test('plugin metadata - version range', t => {
     fastify: '>=2.0.0'
   }
 
-  fastify.register(plugin)
+  await fastify.register(plugin)
 
   fastify.ready(() => {
     t.pass('everything right')
@@ -947,7 +947,7 @@ test('plugin metadata - version not matching requirement', t => {
     fastify: '99.0.0'
   }
 
-  fastify.register(plugin)
+  await fastify.register(plugin)
 
   fastify.ready((err) => {
     t.ok(err)
@@ -969,7 +969,7 @@ test('plugin metadata - version not matching requirement 2', t => {
     fastify: '<=3.0.0'
   }
 
-  fastify.register(plugin)
+  await fastify.register(plugin)
 
   fastify.ready((err) => {
     t.ok(err)
@@ -991,7 +991,7 @@ test('plugin metadata - version not matching requirement 3', t => {
     fastify: '>=99.0.0'
   }
 
-  fastify.register(plugin)
+  await fastify.register(plugin)
 
   fastify.ready((err) => {
     t.ok(err)

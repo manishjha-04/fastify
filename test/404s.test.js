@@ -198,7 +198,7 @@ test('setting a custom 404 handler multiple times is an error', t => {
 
     const fastify = Fastify()
 
-    fastify.register((instance, options, done) => {
+    await fastify.register((instance, options, done) => {
       instance.setNotFoundHandler(() => {})
 
       try {
@@ -223,7 +223,7 @@ test('setting a custom 404 handler multiple times is an error', t => {
 
     const fastify = Fastify()
 
-    fastify.register((instance, options, done) => {
+    await fastify.register((instance, options, done) => {
       try {
         instance.setNotFoundHandler(() => {})
         t.fail('setting multiple 404 handlers at the same prefix encapsulation level should throw')
@@ -247,7 +247,7 @@ test('setting a custom 404 handler multiple times is an error', t => {
 
     const fastify = Fastify()
 
-    fastify.register((instance, options, done) => {
+    await fastify.register((instance, options, done) => {
       instance.setNotFoundHandler(() => {})
 
       instance.register((instance2, options, done) => {
@@ -277,7 +277,7 @@ test('setting a custom 404 handler multiple times is an error', t => {
 
     const fastify = Fastify()
 
-    fastify.register((instance, options, done) => {
+    await fastify.register((instance, options, done) => {
       instance.register((instance2A, options, done) => {
         instance2A.setNotFoundHandler(() => {})
         done()
@@ -320,21 +320,21 @@ test('encapsulated 404', t => {
     reply.code(404).send('this was not found')
   })
 
-  fastify.register(function (f, opts, done) {
+  await fastify.register(function (f, opts, done) {
     f.setNotFoundHandler(function (req, reply) {
       reply.code(404).send('this was not found 2')
     })
     done()
   }, { prefix: '/test' })
 
-  fastify.register(function (f, opts, done) {
+  await fastify.register(function (f, opts, done) {
     f.setNotFoundHandler(function (req, reply) {
       reply.code(404).send('this was not found 3')
     })
     done()
   }, { prefix: '/test2' })
 
-  fastify.register(function (f, opts, done) {
+  await fastify.register(function (f, opts, done) {
     f.setNotFoundHandler(function (request, reply) {
       reply.code(404).send('this was not found 4')
     })
@@ -481,7 +481,7 @@ test('custom 404 hook and handler context', t => {
     reply.code(404).send('this was not found')
   })
 
-  fastify.register(function (instance, opts, done) {
+  await fastify.register(function (instance, opts, done) {
     instance.decorate('bar', 84)
 
     instance.addHook('onRequest', function (req, res, done) {
@@ -530,7 +530,7 @@ test('encapsulated custom 404 without - prefix hook and handler context', t => {
 
   fastify.decorate('foo', 42)
 
-  fastify.register(function (instance, opts, done) {
+  await fastify.register(function (instance, opts, done) {
     instance.decorate('bar', 84)
 
     instance.addHook('onRequest', function (req, res, done) {
@@ -621,7 +621,7 @@ test('run non-encapsulated plugin hooks on default 404', t => {
 
   const fastify = Fastify()
 
-  fastify.register(fp(function (instance, options, done) {
+  await fastify.register(fp(function (instance, options, done) {
     instance.addHook('onRequest', function (req, res, done) {
       t.pass('onRequest called')
       done()
@@ -688,7 +688,7 @@ test('run non-encapsulated plugin hooks on custom 404', t => {
     done()
   })
 
-  fastify.register(plugin)
+  await fastify.register(plugin)
 
   fastify.get('/', function (req, reply) {
     reply.send({ hello: 'world' })
@@ -698,7 +698,7 @@ test('run non-encapsulated plugin hooks on custom 404', t => {
     reply.code(404).send('this was not found')
   })
 
-  fastify.register(plugin) // Registering plugin after handler also works
+  await fastify.register(plugin) // Registering plugin after handler also works
 
   fastify.inject({ url: '/not-found' }, (err, res) => {
     t.error(err)
@@ -732,7 +732,7 @@ test('run hook with encapsulated 404', t => {
     done()
   })
 
-  fastify.register(function (f, opts, done) {
+  await fastify.register(function (f, opts, done) {
     f.setNotFoundHandler(function (req, reply) {
       reply.code(404).send('this was not found 2')
     })
@@ -966,7 +966,7 @@ test('the default 404 handler can be invoked inside a prefixed plugin', t => {
 
   const fastify = Fastify()
 
-  fastify.register(function (instance, opts, done) {
+  await fastify.register(function (instance, opts, done) {
     instance.get('/path', function (request, reply) {
       reply.send(httpErrors.NotFound())
     })
@@ -994,7 +994,7 @@ test('an inherited custom 404 handler can be invoked inside a prefixed plugin', 
     reply.code(404).send('custom handler')
   })
 
-  fastify.register(function (instance, opts, done) {
+  await fastify.register(function (instance, opts, done) {
     instance.get('/path', function (request, reply) {
       reply.send(httpErrors.NotFound())
     })
@@ -1018,7 +1018,7 @@ test('encapsulated custom 404 handler without a prefix is the handler for the en
 
   const fastify = Fastify()
 
-  fastify.register(function (instance, opts, done) {
+  await fastify.register(function (instance, opts, done) {
     instance.setNotFoundHandler(function (request, reply) {
       reply.code(404).send('custom handler')
     })
@@ -1026,7 +1026,7 @@ test('encapsulated custom 404 handler without a prefix is the handler for the en
     done()
   })
 
-  fastify.register(function (instance, opts, done) {
+  await fastify.register(function (instance, opts, done) {
     instance.register(function (instance2, opts, done) {
       instance2.setNotFoundHandler(function (request, reply) {
         reply.code(404).send('custom handler 2')
@@ -1173,7 +1173,7 @@ test('onSend hooks run when an encapsulated route invokes the notFound handler',
   t.plan(3)
   const fastify = Fastify()
 
-  fastify.register((instance, options, done) => {
+  await fastify.register((instance, options, done) => {
     instance.addHook('onSend', (request, reply, payload, done) => {
       t.pass('onSend hook called')
       done()
@@ -1325,7 +1325,7 @@ test('preHandler option for setNotFoundHandler', t => {
       reply.send(req.body)
     })
 
-    fastify.register(function (i, o, n) {
+    await fastify.register(function (i, o, n) {
       i.setNotFoundHandler((req, reply) => {
         reply.send(req.body)
       })
@@ -1459,7 +1459,7 @@ test('preHandler option for setNotFoundHandler', t => {
       reply.send(req.body)
     })
 
-    fastify.register(function (i, o, n) {
+    await fastify.register(function (i, o, n) {
       i.setNotFoundHandler((req, reply) => {
         reply.send(req.body)
       })

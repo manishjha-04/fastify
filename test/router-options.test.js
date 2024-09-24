@@ -20,10 +20,15 @@ test('Should honor ignoreTrailingSlash option', t => {
     ignoreTrailingSlash: true
   })
 
-  fastify.get('/test', (req, res) => {
-    res.send('test')
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/test', (req, res) => {
+      res.send('test')
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, (err) => {
     fastify.server.unref()
     if (err) t.threw(err)
@@ -48,9 +53,13 @@ test('Should honor maxParamLength option', t => {
   t.plan(4)
   const fastify = Fastify({ maxParamLength: 10 })
 
-  fastify.get('/test/:id', (req, reply) => {
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/test/:id', (req, reply) => {
+      reply.send({ hello: 'world' })
+    });
+
+    done();
+  });
 
   fastify.inject({
     method: 'GET',
@@ -73,14 +82,18 @@ test('Should expose router options via getters on request and reply', t => {
   t.plan(7)
   const fastify = Fastify()
 
-  fastify.get('/test/:id', (req, reply) => {
-    t.equal(reply.context.config.url, '/test/:id')
-    t.equal(reply.context.config.method, 'GET')
-    t.equal(req.routerPath, '/test/:id')
-    t.equal(req.routerMethod, 'GET')
-    t.equal(req.is404, false)
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/test/:id', (req, reply) => {
+      t.equal(reply.context.config.url, '/test/:id')
+      t.equal(reply.context.config.method, 'GET')
+      t.equal(req.routerPath, '/test/:id')
+      t.equal(req.routerMethod, 'GET')
+      t.equal(req.is404, false)
+      reply.send({ hello: 'world' })
+    });
+
+    done();
+  });
 
   fastify.inject({
     method: 'GET',
@@ -122,9 +135,13 @@ test('Should honor frameworkErrors option', t => {
     }
   })
 
-  fastify.get('/test/:id', (req, res) => {
-    res.send('{ hello: \'world\' }')
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/test/:id', (req, res) => {
+      res.send('{ hello: \'world\' }')
+    });
+
+    done();
+  });
 
   fastify.inject(
     {

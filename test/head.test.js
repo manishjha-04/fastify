@@ -92,6 +92,7 @@ test('missing schema - head', t => {
   }
 })
 
+// A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
 fastify.listen(0, err => {
   t.error(err)
   fastify.server.unref()

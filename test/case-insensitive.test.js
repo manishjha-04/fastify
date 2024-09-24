@@ -13,10 +13,15 @@ test('case insensitive', t => {
   })
   t.teardown(fastify.close.bind(fastify))
 
-  fastify.get('/foo', (req, reply) => {
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/foo', (req, reply) => {
+      reply.send({ hello: 'world' })
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
 
@@ -41,10 +46,15 @@ test('case insensitive inject', t => {
   })
   t.teardown(fastify.close.bind(fastify))
 
-  fastify.get('/foo', (req, reply) => {
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/foo', (req, reply) => {
+      reply.send({ hello: 'world' })
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
 
@@ -69,11 +79,16 @@ test('case insensitive (parametric)', t => {
   })
   t.teardown(fastify.close.bind(fastify))
 
-  fastify.get('/foo/:param', (req, reply) => {
-    t.equal(req.params.param, 'bAr')
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/foo/:param', (req, reply) => {
+      t.equal(req.params.param, 'bAr')
+      reply.send({ hello: 'world' })
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
 
@@ -98,11 +113,16 @@ test('case insensitive (wildcard)', t => {
   })
   t.teardown(fastify.close.bind(fastify))
 
-  fastify.get('/foo/*', (req, reply) => {
-    t.equal(req.params['*'], 'bAr/baZ')
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/foo/*', (req, reply) => {
+      t.equal(req.params['*'], 'bAr/baZ')
+      reply.send({ hello: 'world' })
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
 

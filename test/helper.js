@@ -91,6 +91,7 @@ module.exports.payloadMethod = function (method, t, isSetErrorHandler = false) {
     }
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, function (err) {
     if (err) {
       t.error(err)

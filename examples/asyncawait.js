@@ -31,6 +31,7 @@ fastify
     return { hello: 'world' }
   })
 
+// A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
 fastify.listen(3000, err => {
   if (err) throw err
 })

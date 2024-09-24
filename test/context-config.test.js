@@ -20,10 +20,14 @@ test('config', t => {
   t.plan(9)
   const fastify = Fastify()
 
-  fastify.get('/get', {
-    schema: schema.schema,
-    config: Object.assign({}, schema.config)
-  }, handler)
+  fastify.register((instance, opts, done) => {
+    instance.get('/get', {
+      schema: schema.schema,
+      config: Object.assign({}, schema.config)
+    }, handler);
+
+    done();
+  });
 
   fastify.route({
     method: 'GET',
@@ -72,10 +76,14 @@ test('config with exposeHeadRoutes', t => {
   t.plan(9)
   const fastify = Fastify({ exposeHeadRoutes: true })
 
-  fastify.get('/get', {
-    schema: schema.schema,
-    config: Object.assign({}, schema.config)
-  }, handler)
+  fastify.register((instance, opts, done) => {
+    instance.get('/get', {
+      schema: schema.schema,
+      config: Object.assign({}, schema.config)
+    }, handler);
+
+    done();
+  });
 
   fastify.route({
     method: 'GET',

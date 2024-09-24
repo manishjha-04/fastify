@@ -31,8 +31,12 @@ t.test('http/2 request while fastify closing', t => {
     t.fail('http2 loading failed', e)
   }
 
-  fastify.get('/', () => Promise.resolve({}))
+  fastify.register((instance, opts, done) => {
+    instance.get('/', () => Promise.resolve({}));
+    done();
+  });
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.server.unref()
@@ -79,8 +83,12 @@ t.test('http/2 request while fastify closing - return503OnClosing: false', t => 
     t.fail('http2 loading failed', e)
   }
 
-  fastify.get('/', () => Promise.resolve({}))
+  fastify.register((instance, opts, done) => {
+    instance.get('/', () => Promise.resolve({}));
+    done();
+  });
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.server.unref()
@@ -122,7 +130,8 @@ t.test('http/2 closes successfully with async await', { skip: semver.lt(process.
     http2: true
   })
 
-  await fastify.listen(0)
+  await // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
+  fastify.listen(0)
 
   const url = getUrl(fastify)
   const session = await connect(url)
@@ -142,7 +151,8 @@ t.test('https/2 closes successfully with async await', { skip: semver.lt(process
     }
   })
 
-  await fastify.listen(0)
+  await // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
+  fastify.listen(0)
 
   const url = getUrl(fastify)
   const session = await connect(url)
@@ -161,12 +171,17 @@ t.test('http/2 server side session emits a timeout event', { skip: semver.lt(pro
     http2: true
   })
 
-  fastify.get('/', async (req) => {
-    req.raw.stream.session.on('timeout', () => _resolve())
-    return {}
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', async (req) => {
+      req.raw.stream.session.on('timeout', () => _resolve())
+      return {}
+    });
 
-  await fastify.listen(0)
+    done();
+  });
+
+  await // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
+  fastify.listen(0)
 
   const url = getUrl(fastify)
   const session = await connect(url)

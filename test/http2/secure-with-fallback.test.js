@@ -28,18 +28,27 @@ test('secure with fallback', (t) => {
     t.fail('Key/cert loading failed', e)
   }
 
-  fastify.get('/', function (req, reply) {
-    reply.code(200).send(msg)
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (req, reply) {
+      reply.code(200).send(msg)
+    });
+
+    done();
+  });
 
   fastify.post('/', function (req, reply) {
     reply.code(200).send(req.body)
   })
 
-  fastify.get('/error', async function (req, reply) {
-    throw new Error('kaboom')
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/error', async function (req, reply) {
+      throw new Error('kaboom')
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.server.unref()

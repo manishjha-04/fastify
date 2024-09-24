@@ -42,11 +42,15 @@ test('async hooks', t => {
     t.ok('onResponse called')
   })
 
-  fastify.get('/', function (request, reply) {
-    t.equal(request.test, 'the request is coming')
-    t.equal(reply.test, 'the reply has come')
-    reply.code(200).send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (request, reply) {
+      t.equal(request.test, 'the request is coming')
+      t.equal(reply.test, 'the reply has come')
+      reply.code(200).send({ hello: 'world' })
+    });
+
+    done();
+  });
 
   fastify.head('/', function (req, reply) {
     reply.code(200).send({ hello: 'world' })
@@ -56,6 +60,7 @@ test('async hooks', t => {
     reply.code(200).send({ hello: 'world' })
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.server.unref()
@@ -112,9 +117,13 @@ test('modify payload', t => {
     t.equal(thePayload, anotherPayload)
   })
 
-  fastify.get('/', (req, reply) => {
-    reply.send(payload)
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (req, reply) => {
+      reply.send(payload)
+    });
+
+    done();
+  });
 
   fastify.inject({
     method: 'GET',
@@ -151,9 +160,13 @@ test('onRequest hooks should be able to block a request', t => {
     t.ok('called')
   })
 
-  fastify.get('/', function (request, reply) {
-    t.fail('we should not be here')
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (request, reply) {
+      t.fail('we should not be here')
+    });
+
+    done();
+  });
 
   fastify.inject({
     url: '/',
@@ -270,9 +283,13 @@ test('preHandler hooks should be able to block a request', t => {
     t.ok('called')
   })
 
-  fastify.get('/', function (request, reply) {
-    t.fail('we should not be here')
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (request, reply) {
+      t.fail('we should not be here')
+    });
+
+    done();
+  });
 
   fastify.inject({
     url: '/',
@@ -304,9 +321,13 @@ test('preValidation hooks should be able to block a request', t => {
     t.ok('called')
   })
 
-  fastify.get('/', function (request, reply) {
-    t.fail('we should not be here')
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (request, reply) {
+      t.fail('we should not be here')
+    });
+
+    done();
+  });
 
   fastify.inject({
     url: '/',
@@ -372,9 +393,13 @@ test('preSerialization hooks should be able to modify the payload', t => {
     return { hello: 'another world' }
   })
 
-  fastify.get('/', function (request, reply) {
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (request, reply) {
+      reply.send({ hello: 'world' })
+    });
+
+    done();
+  });
 
   fastify.inject({
     url: '/',
@@ -394,9 +419,13 @@ test('preSerialization hooks should handle errors', t => {
     throw new Error('kaboom')
   })
 
-  fastify.get('/', function (request, reply) {
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (request, reply) {
+      reply.send({ hello: 'world' })
+    });
+
+    done();
+  });
 
   fastify.inject({
     url: '/',
@@ -422,7 +451,14 @@ test('preValidation hooks should handle throwing null', t => {
     throw null
   })
 
-  fastify.get('/', function (request, reply) { t.fail('the handler must not be called') })
+  fastify.register((instance, opts, done) => {
+    instance.get(
+      '/',
+      function (request, reply) { t.fail('the handler must not be called') }
+    );
+
+    done();
+  });
 
   fastify.inject({
     url: '/',
@@ -448,7 +484,14 @@ test('preValidation hooks should handle throwing a string', t => {
     throw 'this is an error'
   })
 
-  fastify.get('/', function (request, reply) { t.fail('the handler must not be called') })
+  fastify.register((instance, opts, done) => {
+    instance.get(
+      '/',
+      function (request, reply) { t.fail('the handler must not be called') }
+    );
+
+    done();
+  });
 
   fastify.inject({
     url: '/',
@@ -480,9 +523,13 @@ test('onRequest hooks should be able to block a request (last hook)', t => {
     t.ok('called')
   })
 
-  fastify.get('/', function (request, reply) {
-    t.fail('we should not be here')
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (request, reply) {
+      t.fail('we should not be here')
+    });
+
+    done();
+  });
 
   fastify.inject({
     url: '/',
@@ -510,9 +557,13 @@ test('preHandler hooks should be able to block a request (last hook)', t => {
     t.ok('called')
   })
 
-  fastify.get('/', function (request, reply) {
-    t.fail('we should not be here')
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (request, reply) {
+      t.fail('we should not be here')
+    });
+
+    done();
+  });
 
   fastify.inject({
     url: '/',
@@ -554,9 +605,13 @@ test('onRequest respond with a stream', t => {
     t.ok('called')
   })
 
-  fastify.get('/', function (request, reply) {
-    t.fail('we should not be here')
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (request, reply) {
+      t.fail('we should not be here')
+    });
+
+    done();
+  });
 
   fastify.inject({
     url: '/',
@@ -603,9 +658,13 @@ test('preHandler respond with a stream', t => {
     t.ok('called')
   })
 
-  fastify.get('/', function (request, reply) {
-    t.fail('we should not be here')
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (request, reply) {
+      t.fail('we should not be here')
+    });
+
+    done();
+  });
 
   fastify.inject({
     url: '/',
@@ -682,12 +741,18 @@ test('The this should be the same of the encapsulation level', async t => {
     }
   })
 
-  fastify.register(plugin)
-  fastify.get('/', (req, reply) => reply.send('ok'))
+  await fastify.register(plugin)
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (req, reply) => reply.send('ok'));
+    done();
+  });
 
   async function plugin (fastify, opts) {
     fastify.decorate('foo', 'bar')
-    fastify.get('/nested', (req, reply) => reply.send('ok'))
+    fastify.register((instance, opts, done) => {
+      instance.get('/nested', (req, reply) => reply.send('ok'));
+      done();
+    });
   }
 
   await fastify.inject({ method: 'GET', path: '/' })

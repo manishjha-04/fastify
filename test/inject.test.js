@@ -19,7 +19,7 @@ test('should wait for the ready event', t => {
   const fastify = Fastify()
   const payload = { hello: 'world' }
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.get('/', (req, reply) => {
       reply.send(payload)
     })
@@ -311,7 +311,7 @@ test('should reject in error case', t => {
   const fastify = Fastify()
 
   const error = new Error('DOOM!')
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     setTimeout(done, 500, error)
   })
 
@@ -375,9 +375,9 @@ test('should error the promise if ready errors', t => {
   t.plan(3)
   const fastify = Fastify()
 
-  fastify.register((instance, opts) => {
+  (await fastify.register((instance, opts) => {
     return Promise.reject(new Error('kaboom'))
-  }).after(function () {
+  })).after(function () {
     t.pass('after is called')
   })
 
@@ -397,7 +397,7 @@ test('should throw error if callback specified and if ready errors', t => {
   const fastify = Fastify()
   const error = new Error('kaboom')
 
-  fastify.register((instance, opts) => {
+  await fastify.register((instance, opts) => {
     return Promise.reject(error)
   })
 
@@ -444,7 +444,7 @@ test('should support builder-style injection with non-ready app', async (t) => {
 test('should handle errors in builder-style injection correctly', async (t) => {
   t.plan(2)
   const fastify = Fastify()
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     done(new Error('Kaboom'))
   })
 

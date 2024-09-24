@@ -553,7 +553,7 @@ test('content-type regexp list should be cloned when plugin override', async t =
     done(null, payload)
   })
 
-  fastify.register(function plugin (fastify, options, done) {
+  await fastify.register(function plugin (fastify, options, done) {
     fastify.post('/', function (request, reply) {
       reply.type(request.headers['content-type']).send(request.body)
     })

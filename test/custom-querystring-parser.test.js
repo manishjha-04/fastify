@@ -16,14 +16,19 @@ test('Custom querystring parser', t => {
     }
   })
 
-  fastify.get('/', (req, reply) => {
-    t.same(req.query, {
-      foo: 'bar',
-      baz: 'faz'
-    })
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (req, reply) => {
+      t.same(req.query, {
+        foo: 'bar',
+        baz: 'faz'
+      })
+      reply.send({ hello: 'world' })
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, (err, address) => {
     t.error(err)
     t.teardown(() => fastify.close())
@@ -56,11 +61,16 @@ test('Custom querystring parser should be called also if there is nothing to par
     }
   })
 
-  fastify.get('/', (req, reply) => {
-    t.same(req.query, {})
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (req, reply) => {
+      t.same(req.query, {})
+      reply.send({ hello: 'world' })
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, (err, address) => {
     t.error(err)
     t.teardown(() => fastify.close())
@@ -93,11 +103,16 @@ test('Querystring without value', t => {
     }
   })
 
-  fastify.get('/', (req, reply) => {
-    t.same(req.query, { foo: '' })
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (req, reply) => {
+      t.same(req.query, { foo: '' })
+      reply.send({ hello: 'world' })
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, (err, address) => {
     t.error(err)
     t.teardown(() => fastify.close())

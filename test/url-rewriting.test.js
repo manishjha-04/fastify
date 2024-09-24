@@ -22,6 +22,7 @@ test('Should rewrite url', t => {
     }
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, function (err) {
     t.error(err)
 
@@ -55,6 +56,7 @@ test('Should not rewrite if the url is the same', t => {
     }
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, function (err) {
     t.error(err)
 
@@ -86,6 +88,7 @@ test('Should throw an error', t => {
     }
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, function (err) {
     t.error(err)
 

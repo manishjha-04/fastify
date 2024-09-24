@@ -28,24 +28,33 @@ test('async await', t => {
   t.plan(11)
   const fastify = Fastify()
   try {
-    fastify.get('/', opts, async function awaitMyFunc (req, reply) {
-      await sleep(200)
-      return { hello: 'world' }
-    })
+    fastify.register((instance, opts, done) => {
+      instance.get('/', opts, async function awaitMyFunc (req, reply) {
+        await sleep(200)
+        return { hello: 'world' }
+      });
+
+      done();
+    });
     t.pass()
   } catch (e) {
     t.fail()
   }
 
   try {
-    fastify.get('/no-await', opts, async function (req, reply) {
-      return { hello: 'world' }
-    })
+    fastify.register((instance, opts, done) => {
+      instance.get('/no-await', opts, async function (req, reply) {
+        return { hello: 'world' }
+      });
+
+      done();
+    });
     t.pass()
   } catch (e) {
     t.fail()
   }
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.server.unref()
@@ -138,10 +147,14 @@ test('server logs an error if reply.send is called and a value is returned via a
     logger
   })
 
-  fastify.get('/', async (req, reply) => {
-    reply.send({ hello: 'world' })
-    return { hello: 'world2' }
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', async (req, reply) => {
+      reply.send({ hello: 'world' })
+      return { hello: 'world2' }
+    });
+
+    done();
+  });
 
   fastify.inject({
     method: 'GET',
@@ -281,10 +294,14 @@ test('support reply decorators with await', t => {
     })
   })
 
-  fastify.get('/', async (req, reply) => {
-    await sleep(1)
-    reply.wow()
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', async (req, reply) => {
+      await sleep(1)
+      reply.wow()
+    });
+
+    done();
+  });
 
   fastify.inject({
     method: 'GET',
@@ -301,9 +318,13 @@ test('support 204', t => {
 
   const fastify = Fastify()
 
-  fastify.get('/', async (req, reply) => {
-    reply.code(204)
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', async (req, reply) => {
+      reply.code(204)
+    });
+
+    done();
+  });
 
   fastify.inject({
     method: 'GET',
@@ -319,9 +340,13 @@ test('inject async await', async t => {
 
   const fastify = Fastify()
 
-  fastify.get('/', (req, reply) => {
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (req, reply) => {
+      reply.send({ hello: 'world' })
+    });
+
+    done();
+  });
 
   try {
     const res = await fastify.inject({ method: 'GET', url: '/' })
@@ -336,9 +361,13 @@ test('inject async await - when the server equal up', async t => {
 
   const fastify = Fastify()
 
-  fastify.get('/', (req, reply) => {
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (req, reply) => {
+      reply.send({ hello: 'world' })
+    });
+
+    done();
+  });
 
   try {
     const res = await fastify.inject({ method: 'GET', url: '/' })
@@ -362,10 +391,14 @@ test('async await plugin', async t => {
 
   const fastify = Fastify()
 
-  fastify.register(async (fastify, opts) => {
-    fastify.get('/', (req, reply) => {
-      reply.send({ hello: 'world' })
-    })
+  await fastify.register(async (fastify, opts) => {
+    fastify.register((instance, opts, done) => {
+      instance.get('/', (req, reply) => {
+        reply.send({ hello: 'world' })
+      });
+
+      done();
+    });
 
     await sleep(200)
   })
@@ -383,12 +416,16 @@ test('does not call reply.send() twice if 204 response equal already sent', t =>
 
   const fastify = Fastify()
 
-  fastify.get('/', async (req, reply) => {
-    reply.code(204).send()
-    reply.send = () => {
-      throw new Error('reply.send() was called twice')
-    }
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', async (req, reply) => {
+      reply.code(204).send()
+      reply.send = () => {
+        throw new Error('reply.send() was called twice')
+      }
+    });
+
+    done();
+  });
 
   fastify.inject({
     method: 'GET',
@@ -417,14 +454,19 @@ test('error is logged because promise was fulfilled with undefined', t => {
 
   t.teardown(fastify.close.bind(fastify))
 
-  fastify.get('/', async (req, reply) => {
-    reply.code(200)
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', async (req, reply) => {
+      reply.code(200)
+    });
+
+    done();
+  });
 
   stream.once('data', line => {
     t.equal(line.msg, 'Promise may not be fulfilled with \'undefined\' when statusCode is not 204')
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, (err) => {
     t.error(err)
     fastify.server.unref()
@@ -457,14 +499,19 @@ test('error is not logged because promise was fulfilled with undefined but statu
 
   t.teardown(fastify.close.bind(fastify))
 
-  fastify.get('/', async (req, reply) => {
-    reply.code(204)
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', async (req, reply) => {
+      reply.code(204)
+    });
+
+    done();
+  });
 
   stream.once('data', line => {
     t.fail('should not log an error')
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, (err) => {
     t.error(err)
     fastify.server.unref()
@@ -498,14 +545,19 @@ test('error is not logged because promise was fulfilled with undefined but respo
 
   t.teardown(fastify.close.bind(fastify))
 
-  fastify.get('/', async (req, reply) => {
-    reply.send(payload)
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', async (req, reply) => {
+      reply.send(payload)
+    });
+
+    done();
+  });
 
   stream.once('data', line => {
     t.fail('should not log an error')
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, (err) => {
     t.error(err)
     fastify.server.unref()
@@ -532,9 +584,13 @@ test('Thrown Error instance sets HTTP status code', t => {
   const err = new Error('winter is coming')
   err.statusCode = 418
 
-  fastify.get('/', async (req, reply) => {
-    throw err
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', async (req, reply) => {
+      throw err
+    });
+
+    done();
+  });
 
   fastify.inject({
     method: 'GET',
@@ -558,11 +614,15 @@ test('customErrorHandler support', t => {
 
   const fastify = Fastify()
 
-  fastify.get('/', async (req, reply) => {
-    const error = new Error('ouch')
-    error.statusCode = 400
-    throw error
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', async (req, reply) => {
+      const error = new Error('ouch')
+      error.statusCode = 400
+      throw error
+    });
+
+    done();
+  });
 
   fastify.setErrorHandler(async err => {
     t.equal(err.message, 'ouch')
@@ -593,11 +653,15 @@ test('customErrorHandler support without throwing', t => {
 
   const fastify = Fastify()
 
-  fastify.get('/', async (req, reply) => {
-    const error = new Error('ouch')
-    error.statusCode = 400
-    throw error
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', async (req, reply) => {
+      const error = new Error('ouch')
+      error.statusCode = 400
+      throw error
+    });
+
+    done();
+  });
 
   fastify.setErrorHandler(async (err, req, reply) => {
     t.equal(err.message, 'ouch')
@@ -624,12 +688,16 @@ test('customErrorHandler only called if reply not already sent', t => {
 
   const fastify = Fastify()
 
-  fastify.get('/', async (req, reply) => {
-    await reply.send('success')
-    const error = new Error('ouch')
-    error.statusCode = 400
-    throw error
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', async (req, reply) => {
+      await reply.send('success')
+      const error = new Error('ouch')
+      error.statusCode = 400
+      throw error
+    });
+
+    done();
+  });
 
   fastify.setErrorHandler(t.fail.bind(t, 'should not be called'))
 
@@ -652,7 +720,10 @@ test('setNotFoundHandler should accept return value', t => {
 
   const fastify = Fastify()
 
-  fastify.get('/', async () => ({ hello: 'world' }))
+  fastify.register((instance, opts, done) => {
+    instance.get('/', async () => ({ hello: 'world' }));
+    done();
+  });
 
   fastify.setNotFoundHandler((req, reply) => {
     reply.code(404)
@@ -686,11 +757,15 @@ test('customErrorHandler should accept return value', t => {
 
   const fastify = Fastify()
 
-  fastify.get('/', async (req, reply) => {
-    const error = new Error('ouch')
-    error.statusCode = 400
-    throw error
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', async (req, reply) => {
+      const error = new Error('ouch')
+      error.statusCode = 400
+      throw error
+    });
+
+    done();
+  });
 
   fastify.setErrorHandler((err, req, reply) => {
     t.equal(err.message, 'ouch')

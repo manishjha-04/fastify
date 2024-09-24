@@ -16,7 +16,7 @@ t.test('onReady should be called in order', t => {
     done()
   })
 
-  fastify.register(async (childOne, o) => {
+  await fastify.register(async (childOne, o) => {
     childOne.addHook('onReady', function (done) {
       t.equal(order++, 1, 'called in childOne')
       t.equal(this.pluginName, childOne.pluginName, 'the this binding is the right instance')
@@ -47,7 +47,7 @@ t.test('async onReady should be called in order', async t => {
     t.equal(this.pluginName, fastify.pluginName, 'the this binding is the right instance')
   })
 
-  fastify.register(async (childOne, o) => {
+  await fastify.register(async (childOne, o) => {
     childOne.addHook('onReady', async function () {
       await immediate()
       t.equal(order++, 1, 'called in childOne')
@@ -90,7 +90,7 @@ t.test('listen and onReady order', async t => {
   const fastify = Fastify()
   let order = 0
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.ready(checkOrder.bind(null, 0))
     instance.addHook('onReady', checkOrder.bind(null, 4))
 
@@ -129,7 +129,7 @@ t.test('multiple ready calls', async t => {
   const fastify = Fastify()
   let order = 0
 
-  fastify.register(async (instance, opts) => {
+  await fastify.register(async (instance, opts) => {
     instance.ready(checkOrder.bind(null, 1))
     instance.addHook('onReady', checkOrder.bind(null, 6))
 
@@ -170,7 +170,7 @@ t.test('onReady should manage error in sync', t => {
     done()
   })
 
-  fastify.register(async (childOne, o) => {
+  await fastify.register(async (childOne, o) => {
     childOne.addHook('onReady', function (done) {
       t.pass('called in childOne')
       done(new Error('FAIL ON READY'))
@@ -198,7 +198,7 @@ t.test('onReady should manage error in async', t => {
     done()
   })
 
-  fastify.register(async (childOne, o) => {
+  await fastify.register(async (childOne, o) => {
     childOne.addHook('onReady', async function () {
       t.pass('called in childOne')
       throw new Error('FAIL ON READY')
@@ -226,7 +226,7 @@ t.test('onReady should manage sync error', t => {
     done()
   })
 
-  fastify.register(async (childOne, o) => {
+  await fastify.register(async (childOne, o) => {
     childOne.addHook('onReady', function (done) {
       t.pass('called in childOne')
       throw new Error('FAIL UNWANTED SYNC EXCEPTION')
@@ -347,12 +347,12 @@ t.test('ready return registered', t => {
   t.plan(4)
   const fastify = Fastify()
 
-  fastify.register((one, opts, done) => {
+  await fastify.register((one, opts, done) => {
     one.ready().then(itself => { t.same(itself, one) })
     done()
   })
 
-  fastify.register((two, opts, done) => {
+  await fastify.register((two, opts, done) => {
     two.ready().then(itself => { t.same(itself, two) })
 
     two.register((twoDotOne, opts, done) => {

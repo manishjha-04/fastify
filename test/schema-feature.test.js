@@ -70,7 +70,7 @@ test('The schema should be accessible by id via getSchema', t => {
   t.same(fastify.getSchema('id'), schemas[0])
   t.same(fastify.getSchema('foo'), undefined)
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     const pluginSchema = { $id: 'cde', my: 'schema' }
     instance.addSchema(pluginSchema)
     t.same(instance.getSchema('cde'), pluginSchema)
@@ -428,7 +428,7 @@ test('Encapsulation should intervene', t => {
   t.plan(2)
   const fastify = Fastify()
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addSchema({
       $id: 'encapsulation',
       type: 'object',
@@ -439,7 +439,7 @@ test('Encapsulation should intervene', t => {
     done()
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.get('/:id', {
       handler: echoParams,
       schema: {
@@ -459,12 +459,12 @@ test('Encapsulation isolation', t => {
   t.plan(1)
   const fastify = Fastify()
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addSchema({ $id: 'id' })
     done()
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addSchema({ $id: 'id' })
     done()
   })
@@ -476,7 +476,7 @@ test('Add schema after register', t => {
   t.plan(5)
 
   const fastify = Fastify()
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.get('/:id', {
       handler: echoParams,
       schema: {
@@ -529,13 +529,13 @@ test('Encapsulation isolation for getSchemas', t => {
 
   fastify.addSchema(schemas.z)
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addSchema(schemas.a)
     pluginDeepOneSide = instance
     done()
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addSchema(schemas.b)
     instance.register((subinstance, opts, done) => {
       subinstance.addSchema(schemas.c)
@@ -928,7 +928,7 @@ test('Cross schema reference with encapsulation references', t => {
     items: refItem
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addSchema({
       $id: 'encapsulation',
       type: 'object',
@@ -971,12 +971,12 @@ test('Check how many AJV instances are built #1', t => {
   t.notOk(fastify.validatorCompiler, 'validator not initialized')
 
   const instances = []
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     t.notOk(fastify.validatorCompiler, 'validator not initialized')
     instances.push(instance)
     done()
   })
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     t.notOk(fastify.validatorCompiler, 'validator not initialized')
     addRandomRoute(instance)
     instances.push(instance)
@@ -1021,7 +1021,7 @@ test('onReady hook has the compilers ready', t => {
   })
 
   let hookCallCounter = 0
-  fastify.register(async (i, o) => {
+  await fastify.register(async (i, o) => {
     i.addHook('onReady', function (done) {
       t.ok(this.validatorCompiler)
       t.ok(this.serializerCompiler)
@@ -1047,7 +1047,7 @@ test('Check how many AJV instances are built #2 - verify validatorPool', t => {
   const fastify = Fastify()
   t.notOk(fastify.validatorCompiler, 'validator not initialized')
 
-  fastify.register(function sibling1 (instance, opts, done) {
+  await fastify.register(function sibling1 (instance, opts, done) {
     addRandomRoute(instance)
     t.notOk(instance.validatorCompiler, 'validator not initialized')
     instance.ready(() => {
@@ -1060,7 +1060,7 @@ test('Check how many AJV instances are built #2 - verify validatorPool', t => {
     done()
   })
 
-  fastify.register(function sibling2 (instance, opts, done) {
+  await fastify.register(function sibling2 (instance, opts, done) {
     addRandomRoute(instance)
     t.notOk(instance.validatorCompiler, 'validator not initialized')
     instance.ready(() => {
@@ -1081,7 +1081,7 @@ test('Check how many AJV instances are built #2 - verify validatorPool', t => {
     done()
   })
 
-  fastify.register(function sibling3 (instance, opts, done) {
+  await fastify.register(function sibling3 (instance, opts, done) {
     addRandomRoute(instance)
 
     // this trigger to dont't reuse the same compiler pool
@@ -1111,7 +1111,7 @@ test('Add schema order should not break the startup', t => {
 
   fastify.get('/', { schema: { random: 'options' } }, () => {})
 
-  fastify.register(fp((f, opts) => {
+  await fastify.register(fp((f, opts) => {
     f.addSchema({
       $id: 'https://example.com/bson/objectId',
       type: 'string',
@@ -1140,7 +1140,7 @@ test('The schema compiler recreate itself if needed', t => {
 
   fastify.options('/', { schema: { hide: true } }, echoBody)
 
-  fastify.register(function (fastify, options, done) {
+  await fastify.register(function (fastify, options, done) {
     fastify.addSchema({
       $id: 'identifier',
       type: 'string',
@@ -1208,7 +1208,7 @@ test('Schema controller bucket', t => {
     }
   })
 
-  fastify.register(async (instance) => {
+  await fastify.register(async (instance) => {
     instance.addSchema({ $id: 'b', type: 'string' })
     instance.addHook('onReady', function (done) {
       t.equal(instance.getSchemas().size, 2)
@@ -1223,7 +1223,7 @@ test('Schema controller bucket', t => {
     })
   })
 
-  fastify.register(async (instance) => {
+  await fastify.register(async (instance) => {
     instance.addHook('onReady', function (done) {
       t.equal(instance.getSchemas().size, 1)
       done()
@@ -1243,7 +1243,7 @@ test('setSchemaController per instance', t => {
   t.plan(7)
   const fastify = Fastify({})
 
-  fastify.register(async (instance1) => {
+  await fastify.register(async (instance1) => {
     instance1.setSchemaController({
       bucket: function factoryBucket (storeInit) {
         t.pass('instance1 has created the bucket')
@@ -1256,7 +1256,7 @@ test('setSchemaController per instance', t => {
     })
   })
 
-  fastify.register(async (instance2) => {
+  await fastify.register(async (instance2) => {
     const bSchema = { $id: 'b', type: 'string' }
 
     instance2.setSchemaController({

@@ -70,10 +70,12 @@ test('Example - get schema encapsulated', async t => {
   const fastify = Fastify()
 
   fastify.addSchema({ $id: 'one', my: 'hello' })
-  // will return only `one` schema
-  fastify.get('/', (request, reply) => { reply.send(fastify.getSchemas()) })
-
   fastify.register((instance, opts, done) => {
+    instance.get('/', (request, reply) => { reply.send(fastify.getSchemas()) });
+    done();
+  });
+
+  await fastify.register((instance, opts, done) => {
     instance.addSchema({ $id: 'two', my: 'ciao' })
     // will return `one` and `two` schemas
     instance.get('/sub', (request, reply) => { reply.send(instance.getSchemas()) })
@@ -332,19 +334,23 @@ test('Example - serializator', t => {
     return data => JSON.stringify(data)
   })
 
-  fastify.get('/user', {
-    handler (req, reply) {
-      reply.send({ id: 1, name: 'Foo', image: 'BIG IMAGE' })
-    },
-    schema: {
-      response: {
-        '2xx': {
-          id: { type: 'number' },
-          name: { type: 'string' }
+  fastify.register((instance, opts, done) => {
+    instance.get('/user', {
+      handler (req, reply) {
+        reply.send({ id: 1, name: 'Foo', image: 'BIG IMAGE' })
+      },
+      schema: {
+        response: {
+          '2xx': {
+            id: { type: 'number' },
+            name: { type: 'string' }
+          }
         }
       }
-    }
-  })
+    });
+
+    done();
+  });
 
   fastify.ready(err => t.error(err))
 })
@@ -431,16 +437,20 @@ test('Example - schemas examples', t => {
     }
   }
 
-  fastify.get('/', {
-    handler,
-    schema: {
-      body: refToId,
-      headers: refToDefinitions,
-      params: refToSharedSchemaId,
-      query: refToSharedSchemaDefinitions
-    }
+  fastify.register((instance, opts, done) => {
+    instance.get('/', {
+      handler,
+      schema: {
+        body: refToId,
+        headers: refToDefinitions,
+        params: refToSharedSchemaId,
+        query: refToSharedSchemaDefinitions
+      }
 
-  })
+    });
+
+    done();
+  });
 
   fastify.ready(err => t.error(err))
 })

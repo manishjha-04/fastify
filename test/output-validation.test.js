@@ -31,9 +31,13 @@ const opts = {
 test('shorthand - output string', t => {
   t.plan(1)
   try {
-    fastify.get('/string', opts, function (req, reply) {
-      reply.code(200).send({ hello: 'world' })
-    })
+    fastify.register((instance, opts, done) => {
+      instance.get('/string', opts, function (req, reply) {
+        reply.code(200).send({ hello: 'world' })
+      });
+
+      done();
+    });
     t.pass()
   } catch (e) {
     t.fail()
@@ -43,9 +47,13 @@ test('shorthand - output string', t => {
 test('shorthand - output number', t => {
   t.plan(1)
   try {
-    fastify.get('/number', opts, function (req, reply) {
-      reply.code(201).send({ hello: 55 })
-    })
+    fastify.register((instance, opts, done) => {
+      instance.get('/number', opts, function (req, reply) {
+        reply.code(201).send({ hello: 55 })
+      });
+
+      done();
+    });
     t.pass()
   } catch (e) {
     t.fail()
@@ -55,10 +63,14 @@ test('shorthand - output number', t => {
 test('wrong object for schema - output', t => {
   t.plan(1)
   try {
-    fastify.get('/wrong-object-for-schema', opts, function (req, reply) {
-      // will send { }
-      reply.code(201).send({ hello: 'world' })
-    })
+    fastify.register((instance, opts, done) => {
+      instance.get('/wrong-object-for-schema', opts, function (req, reply) {
+        // will send { }
+        reply.code(201).send({ hello: 'world' })
+      });
+
+      done();
+    });
     t.pass()
   } catch (e) {
     t.fail()
@@ -68,10 +80,13 @@ test('wrong object for schema - output', t => {
 test('empty response', t => {
   t.plan(1)
   try {
-    // no checks
-    fastify.get('/empty', opts, function (req, reply) {
-      reply.code(204).send()
-    })
+    fastify.register((instance, opts, done) => {
+      instance.get('/empty', opts, function (req, reply) {
+        reply.code(204).send()
+      });
+
+      done();
+    });
     t.pass()
   } catch (e) {
     t.fail()
@@ -81,15 +96,20 @@ test('empty response', t => {
 test('unlisted response code', t => {
   t.plan(1)
   try {
-    fastify.get('/400', opts, function (req, reply) {
-      reply.code(400).send({ hello: 'DOOM' })
-    })
+    fastify.register((instance, opts, done) => {
+      instance.get('/400', opts, function (req, reply) {
+        reply.code(400).send({ hello: 'DOOM' })
+      });
+
+      done();
+    });
     t.pass()
   } catch (e) {
     t.fail()
   }
 })
 
+// A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
 fastify.listen(0, err => {
   t.error(err)
   fastify.server.unref()

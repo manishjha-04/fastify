@@ -12,11 +12,16 @@ test('Should accept a custom genReqId function', t => {
     }
   })
 
-  fastify.get('/', (req, reply) => {
-    t.ok(req.id)
-    reply.send({ id: req.id })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (req, reply) => {
+      t.ok(req.id)
+      reply.send({ id: req.id })
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.inject({

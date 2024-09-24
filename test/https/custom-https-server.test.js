@@ -32,11 +32,16 @@ test('Should support a custom https server', t => {
 
   t.teardown(fastify.close.bind(fastify))
 
-  fastify.get('/', (req, reply) => {
-    t.ok(req.raw.custom)
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (req, reply) => {
+      t.ok(req.raw.custom)
+      reply.send({ hello: 'world' })
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
 

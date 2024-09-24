@@ -41,13 +41,13 @@ test('Encapsulation works', t => {
   t.plan(2)
   const fastify = Fastify()
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.decorate('use', () => true)
     t.equal(instance.use(), true)
     done()
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     try {
       instance.use()
       t.fail('Should throw')

@@ -298,7 +298,7 @@ test('Custom setSerializerCompiler', t => {
     return data => JSON.stringify(data)
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.get('/:id', {
       handler (req, reply) {
         reply.send({ id: 1 })
@@ -380,7 +380,7 @@ test('Custom serializer per route', async t => {
   })
 
   let hit = 0
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.setSerializerCompiler(({ schema, method, url, httpStatus }) => {
       hit++
       return data => JSON.stringify({ mean: 'custom' })
@@ -501,7 +501,7 @@ test('The schema compiler recreate itself if needed', t => {
     }
   }, echoBody)
 
-  fastify.register(function (fastify, options, done) {
+  await fastify.register(function (fastify, options, done) {
     fastify.addSchema({
       $id: 'identifier',
       type: 'string',

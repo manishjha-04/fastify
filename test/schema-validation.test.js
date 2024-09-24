@@ -161,7 +161,7 @@ test('Encapsulation', t => {
   fastify.addSchema(schemaA)
   fastify.addSchema(schemaBRefToA)
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     const validator = ({ schema, method, url, httpPart }) => {
       return ajv.compile(schema)
     }
@@ -202,7 +202,7 @@ test('Encapsulation', t => {
     done()
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.post('/clean', function (req, reply) {
       t.equal(instance.validatorCompiler, undefined)
       reply.send({ foo: 'bar' })

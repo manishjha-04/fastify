@@ -11,12 +11,17 @@ test('maxRequestsPerSocket on node version >= 16.10.0', { skip }, t => {
   t.plan(8)
 
   const fastify = Fastify({ maxRequestsPerSocket: 2 })
-  fastify.get('/', (req, reply) => {
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (req, reply) => {
+      reply.send({ hello: 'world' })
+    });
+
+    done();
+  });
 
   t.teardown(fastify.close.bind(fastify))
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, function (err) {
     t.error(err)
 
@@ -51,12 +56,17 @@ test('maxRequestsPerSocket zero should behave same as null', { skip }, t => {
   t.plan(10)
 
   const fastify = Fastify({ maxRequestsPerSocket: 0 })
-  fastify.get('/', (req, reply) => {
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (req, reply) => {
+      reply.send({ hello: 'world' })
+    });
+
+    done();
+  });
 
   t.teardown(fastify.close.bind(fastify))
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, function (err) {
     t.error(err)
 

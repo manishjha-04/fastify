@@ -166,7 +166,7 @@ test('onRequest hook should support encapsulation / 1', t => {
   t.plan(5)
   const fastify = Fastify()
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('onRequest', (req, reply, done) => {
       t.equal(req.raw.url, '/plugin')
       done()
@@ -201,7 +201,7 @@ test('onRequest hook should support encapsulation / 2', t => {
 
   fastify.addHook('onRequest', () => {})
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('onRequest', () => {})
     pluginInstance = instance
     done()
@@ -234,7 +234,7 @@ test('onRequest hook should support encapsulation / 3', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.decorate('hello3', 'world')
     instance.addHook('onRequest', function (req, reply, done) {
       t.ok(this.hello)
@@ -296,7 +296,7 @@ test('preHandler hook should support encapsulation / 5', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.decorate('hello2', 'world')
     instance.addHook('preHandler', function (req, res, done) {
       t.ok(this.hello)
@@ -344,7 +344,7 @@ test('onRoute hook should be called / 1', t => {
   t.plan(2)
   const fastify = Fastify()
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('onRoute', () => {
       t.pass()
     })
@@ -369,7 +369,7 @@ test('onRoute hook should be called / 2', t => {
     firstHandler++
   })
 
-  fastify.register((instance, opts, done) => {
+  (await fastify.register((instance, opts, done) => {
     instance.addHook('onRoute', (route) => {
       t.pass()
       secondHandler++
@@ -378,7 +378,7 @@ test('onRoute hook should be called / 2', t => {
       reply.send()
     })
     done()
-  })
+  }))
     .after(() => {
       t.equal(firstHandler, 1)
       t.equal(secondHandler, 1)
@@ -401,13 +401,13 @@ test('onRoute hook should be called / 3', t => {
     t.pass()
   })
 
-  fastify.register((instance, opts, done) => {
+  (await fastify.register((instance, opts, done) => {
     instance.addHook('onRoute', (route) => {
       t.pass()
     })
     instance.get('/a', handler)
     done()
-  })
+  }))
     .after((err, done) => {
       t.error(err)
       setTimeout(() => {
@@ -429,7 +429,7 @@ test('onRoute hook should be called (encapsulation support) / 4', t => {
     t.pass()
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('onRoute', () => {
       t.pass()
     })
@@ -456,7 +456,7 @@ test('onRoute hook should be called (encapsulation support) / 5', t => {
     reply.send()
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('onRoute', () => {
       t.pass()
     })
@@ -495,7 +495,7 @@ test('onRoute hook should be called (encapsulation support) / 6', t => {
 test('onRoute should keep the context', t => {
   t.plan(4)
   const fastify = Fastify()
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.decorate('test', true)
     instance.addHook('onRoute', onRoute)
     t.ok(instance.prototype === fastify.prototype)
@@ -527,7 +527,7 @@ test('onRoute hook should pass correct route', t => {
     t.equal(route.routePath, '/')
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('onRoute', (route) => {
       t.equal(route.method, 'GET')
       t.equal(route.url, '/')
@@ -556,7 +556,7 @@ test('onRoute hook should pass correct route with custom prefix', t => {
     t.equal(route.prefix, '/v1')
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('onRoute', function (route) {
       t.equal(route.method, 'GET')
       t.equal(route.url, '/v1/foo')
@@ -578,7 +578,7 @@ test('onRoute hook should pass correct route with custom prefix', t => {
 test('onRoute hook should pass correct route with custom options', t => {
   t.plan(6)
   const fastify = Fastify()
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('onRoute', function (route) {
       t.equal(route.method, 'GET')
       t.equal(route.url, '/foo')
@@ -606,7 +606,7 @@ test('onRoute hook should pass correct route with custom options', t => {
 test('onRoute hook should receive any route option', t => {
   t.plan(5)
   const fastify = Fastify()
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('onRoute', function (route) {
       t.equal(route.method, 'GET')
       t.equal(route.url, '/foo')
@@ -627,7 +627,7 @@ test('onRoute hook should receive any route option', t => {
 test('onRoute hook should preserve system route configuration', t => {
   t.plan(5)
   const fastify = Fastify()
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('onRoute', function (route) {
       t.equal(route.method, 'GET')
       t.equal(route.url, '/foo')
@@ -651,7 +651,7 @@ test('onRoute hook should preserve handler function in options of shorthand rout
   const handler = (req, reply) => {}
 
   const fastify = Fastify()
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('onRoute', function (route) {
       t.equal(route.handler, handler)
     })
@@ -674,7 +674,7 @@ test('onRoute hook should be called once when prefixTrailingSlash', t => {
   const fastify = Fastify({ ignoreTrailingSlash: false })
 
   // a plugin that patches route options, similar to fastify-compress
-  fastify.register(fp(function myPlugin (instance, opts, next) {
+  await fastify.register(fp(function myPlugin (instance, opts, next) {
     function patchTheRoute () {
       routePatched++
     }
@@ -687,7 +687,7 @@ test('onRoute hook should be called once when prefixTrailingSlash', t => {
     next()
   }))
 
-  fastify.register(function routes (instance, opts, next) {
+  await fastify.register(function routes (instance, opts, next) {
     instance.route({
       method: 'GET',
       url: '/',
@@ -712,7 +712,7 @@ test('onRoute hook should able to change the route url', t => {
 
   const fastify = Fastify()
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('onRoute', (route) => {
       t.equal(route.url, '/föö')
       route.url = encodeURI(route.url)
@@ -744,7 +744,7 @@ test('onRoute hook that throws should be caught ', t => {
   t.plan(1)
   const fastify = Fastify()
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('onRoute', () => {
       throw new Error('snap')
     })
@@ -769,7 +769,7 @@ test('onRoute hook with many prefix', t => {
     { routePath: '/aPath', prefix: '/one', url: '/one/aPath' }
   ]
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('onRoute', (route) => {
       t.match(route, onRouteChecks.pop())
     })
@@ -824,7 +824,7 @@ test('onResponse hook should support encapsulation / 1', t => {
   t.plan(5)
   const fastify = Fastify()
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('onResponse', (request, reply, done) => {
       t.equal(reply.plugin, true)
       done()
@@ -860,7 +860,7 @@ test('onResponse hook should support encapsulation / 2', t => {
 
   fastify.addHook('onResponse', () => {})
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('onResponse', () => {})
     pluginInstance = instance
     done()
@@ -888,7 +888,7 @@ test('onResponse hook should support encapsulation / 3', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.decorate('hello2', 'world')
     instance.addHook('onResponse', function (request, reply, done) {
       t.ok(this.hello)
@@ -937,7 +937,7 @@ test('onSend hook should support encapsulation / 1', t => {
 
   fastify.addHook('onSend', () => {})
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('onSend', () => {})
     pluginInstance = instance
     done()
@@ -965,7 +965,7 @@ test('onSend hook should support encapsulation / 2', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.decorate('hello2', 'world')
     instance.addHook('onSend', function (request, reply, thePayload, done) {
       t.ok(this.hello)
@@ -1011,7 +1011,7 @@ test('onSend hook is called after payload is serialized and headers are set', t 
   t.plan(30)
   const fastify = Fastify()
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     const thePayload = { hello: 'world' }
 
     instance.addHook('onSend', function (request, reply, payload, done) {
@@ -1027,7 +1027,7 @@ test('onSend hook is called after payload is serialized and headers are set', t 
     done()
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('onSend', function (request, reply, payload, done) {
       t.equal(payload, 'some text')
       t.equal(reply[symbols.kReplyHeaders]['content-type'], 'text/plain; charset=utf-8')
@@ -1041,7 +1041,7 @@ test('onSend hook is called after payload is serialized and headers are set', t 
     done()
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     const thePayload = Buffer.from('buffer payload')
 
     instance.addHook('onSend', function (request, reply, payload, done) {
@@ -1057,7 +1057,7 @@ test('onSend hook is called after payload is serialized and headers are set', t 
     done()
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     let chunk = 'stream payload'
     const thePayload = new stream.Readable({
       read () {
@@ -1079,7 +1079,7 @@ test('onSend hook is called after payload is serialized and headers are set', t 
     done()
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     const serializedPayload = 'serialized'
 
     instance.addHook('onSend', function (request, reply, payload, done) {
@@ -1777,7 +1777,7 @@ test('Register an hook after a plugin inside a plugin', t => {
   t.plan(6)
   const fastify = Fastify()
 
-  fastify.register(fp(function (instance, opts, done) {
+  await fastify.register(fp(function (instance, opts, done) {
     instance.addHook('preHandler', function (req, reply, done) {
       t.ok('called')
       done()
@@ -1790,7 +1790,7 @@ test('Register an hook after a plugin inside a plugin', t => {
     done()
   }))
 
-  fastify.register(fp(function (instance, opts, done) {
+  await fastify.register(fp(function (instance, opts, done) {
     instance.addHook('preHandler', function (req, reply, done) {
       t.ok('called')
       done()
@@ -1818,7 +1818,7 @@ test('Register an hook after a plugin inside a plugin (with preHandler option)',
   t.plan(7)
   const fastify = Fastify()
 
-  fastify.register(fp(function (instance, opts, done) {
+  await fastify.register(fp(function (instance, opts, done) {
     instance.addHook('preHandler', function (req, reply, done) {
       t.ok('called')
       done()
@@ -1836,7 +1836,7 @@ test('Register an hook after a plugin inside a plugin (with preHandler option)',
     done()
   }))
 
-  fastify.register(fp(function (instance, opts, done) {
+  await fastify.register(fp(function (instance, opts, done) {
     instance.addHook('preHandler', function (req, reply, done) {
       t.ok('called')
       done()
@@ -1864,7 +1864,7 @@ test('Register hooks inside a plugin after an encapsulated plugin', t => {
   t.plan(7)
   const fastify = Fastify()
 
-  fastify.register(function (instance, opts, done) {
+  await fastify.register(function (instance, opts, done) {
     instance.get('/', function (request, reply) {
       reply.send({ hello: 'world' })
     })
@@ -1872,7 +1872,7 @@ test('Register hooks inside a plugin after an encapsulated plugin', t => {
     done()
   })
 
-  fastify.register(fp(function (instance, opts, done) {
+  await fastify.register(fp(function (instance, opts, done) {
     instance.addHook('onRequest', function (req, reply, done) {
       t.ok('called')
       done()
@@ -1907,7 +1907,7 @@ test('onRequest hooks should run in the order in which they are defined', t => {
   t.plan(9)
   const fastify = Fastify()
 
-  fastify.register(function (instance, opts, done) {
+  await fastify.register(function (instance, opts, done) {
     instance.addHook('onRequest', function (req, reply, done) {
       t.equal(req.previous, undefined)
       req.previous = 1
@@ -1931,7 +1931,7 @@ test('onRequest hooks should run in the order in which they are defined', t => {
     done()
   })
 
-  fastify.register(fp(function (instance, opts, done) {
+  await fastify.register(fp(function (instance, opts, done) {
     instance.addHook('onRequest', function (req, reply, done) {
       t.equal(req.previous, 2)
       req.previous = 3
@@ -1967,7 +1967,7 @@ test('preHandler hooks should run in the order in which they are defined', t => 
   t.plan(9)
   const fastify = Fastify()
 
-  fastify.register(function (instance, opts, done) {
+  await fastify.register(function (instance, opts, done) {
     instance.addHook('preHandler', function (request, reply, done) {
       t.equal(request.previous, undefined)
       request.previous = 1
@@ -1991,7 +1991,7 @@ test('preHandler hooks should run in the order in which they are defined', t => 
     done()
   })
 
-  fastify.register(fp(function (instance, opts, done) {
+  await fastify.register(fp(function (instance, opts, done) {
     instance.addHook('preHandler', function (request, reply, done) {
       t.equal(request.previous, 2)
       request.previous = 3
@@ -2027,7 +2027,7 @@ test('onSend hooks should run in the order in which they are defined', t => {
   t.plan(8)
   const fastify = Fastify()
 
-  fastify.register(function (instance, opts, done) {
+  await fastify.register(function (instance, opts, done) {
     instance.addHook('onSend', function (request, reply, payload, done) {
       t.equal(request.previous, undefined)
       request.previous = 1
@@ -2050,7 +2050,7 @@ test('onSend hooks should run in the order in which they are defined', t => {
     done()
   })
 
-  fastify.register(fp(function (instance, opts, done) {
+  await fastify.register(fp(function (instance, opts, done) {
     instance.addHook('onSend', function (request, reply, payload, done) {
       t.equal(request.previous, 2)
       request.previous = 3
@@ -2085,7 +2085,7 @@ test('onResponse hooks should run in the order in which they are defined', t => 
   t.plan(8)
   const fastify = Fastify()
 
-  fastify.register(function (instance, opts, done) {
+  await fastify.register(function (instance, opts, done) {
     instance.addHook('onResponse', function (request, reply, done) {
       t.equal(reply.previous, undefined)
       reply.previous = 1
@@ -2108,7 +2108,7 @@ test('onResponse hooks should run in the order in which they are defined', t => 
     done()
   })
 
-  fastify.register(fp(function (instance, opts, done) {
+  await fastify.register(fp(function (instance, opts, done) {
     instance.addHook('onResponse', function (request, reply, done) {
       t.equal(reply.previous, 2)
       reply.previous = 3
@@ -2287,7 +2287,7 @@ test('preValidation hook should support encapsulation / 1', t => {
   t.plan(5)
   const fastify = Fastify()
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('preValidation', (req, reply, done) => {
       t.equal(req.raw.url, '/plugin')
       done()
@@ -2322,7 +2322,7 @@ test('preValidation hook should support encapsulation / 2', t => {
 
   fastify.addHook('preValidation', () => {})
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('preValidation', () => {})
     pluginInstance = instance
     done()
@@ -2355,7 +2355,7 @@ test('preValidation hook should support encapsulation / 3', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.decorate('hello3', 'world')
     instance.addHook('preValidation', function (req, reply, done) {
       t.ok(this.hello)
@@ -2656,7 +2656,7 @@ test('preParsing hooks should support encapsulation', t => {
     reply.send(req.body)
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('preParsing', function (req, reply, payload, done) {
       const modified = new stream.Readable()
       modified.receivedEncodedLength = payload.receivedEncodedLength || parseInt(req.headers['content-length'], 10)
@@ -2706,7 +2706,7 @@ test('preParsing hook should support encapsulation / 1', t => {
   t.plan(5)
   const fastify = Fastify()
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('preParsing', (req, reply, payload, done) => {
       t.equal(req.raw.url, '/plugin')
       done()
@@ -2741,7 +2741,7 @@ test('preParsing hook should support encapsulation / 2', t => {
 
   fastify.addHook('preParsing', function a () {})
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('preParsing', function b () {})
     pluginInstance = instance
     done()
@@ -2774,7 +2774,7 @@ test('preParsing hook should support encapsulation / 3', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.decorate('hello3', 'world')
     instance.addHook('preParsing', function (req, reply, payload, done) {
       t.ok(this.hello)
@@ -3004,7 +3004,7 @@ test('preSerialization hooks should support encapsulation', t => {
     reply.send({ hello: 'world' })
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.addHook('preSerialization', function (req, reply, payload, done) {
       payload.hello += '2'
 
@@ -3055,7 +3055,7 @@ test('onRegister hook should be called / 1', t => {
   })
 
   const pluginOpts = { prefix: 'hello', custom: 'world' }
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     done()
   }, pluginOpts)
 
@@ -3071,14 +3071,14 @@ test('onRegister hook should be called / 2', t => {
     t.ok(instance.addHook)
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.register((instance, opts, done) => {
       done()
     })
     done()
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     done()
   })
 
@@ -3097,7 +3097,7 @@ test('onRegister hook should be called / 3', t => {
     instance.data = instance.data.slice()
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.data.push(1)
     instance.register((instance, opts, done) => {
       instance.data.push(2)
@@ -3108,7 +3108,7 @@ test('onRegister hook should be called / 3', t => {
     done()
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     t.same(instance.data, [])
     done()
   })
@@ -3131,7 +3131,7 @@ test('onRegister hook should be called (encapsulation)', t => {
     t.fail('This should not be called')
   })
 
-  fastify.register(plugin)
+  await fastify.register(plugin)
 
   fastify.ready(err => {
     t.error(err)

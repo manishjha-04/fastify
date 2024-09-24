@@ -1,11 +1,15 @@
 const fp = require('fastify-plugin')
 const fastify = require('../../../../')()
 
-fastify.get('/', function (request, reply) {
-  reply.send({ hello: 'world' })
-})
+fastify.register((instance, opts, done) => {
+  instance.get('/', function (request, reply) {
+    reply.send({ hello: 'world' })
+  });
 
-fastify.register(fp((instance, opts, done) => {
+  done();
+});
+
+await fastify.register(fp((instance, opts, done) => {
   done()
 }, { fastify: '9.x' }))
 

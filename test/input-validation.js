@@ -95,7 +95,7 @@ module.exports.payloadMethod = function (method, t) {
         reply.send(req.body)
       })
 
-      fastify.register(function (fastify2, opts, done) {
+      await fastify.register(function (fastify2, opts, done) {
         fastify2.setValidatorCompiler(function schema ({ schema, method, url, httpPart }) {
           return body => ({ error: new Error('From custom schema compiler!') })
         })

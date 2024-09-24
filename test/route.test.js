@@ -205,13 +205,13 @@ test('same route definition object on multiple prefixes', async t => {
 
   const fastify = Fastify()
 
-  fastify.register(async function (f) {
+  await fastify.register(async function (f) {
     f.addHook('onRoute', (routeOptions) => {
       t.equal(routeOptions.url, '/v1/simple')
     })
     f.route(routeObject)
   }, { prefix: '/v1' })
-  fastify.register(async function (f) {
+  await fastify.register(async function (f) {
     f.addHook('onRoute', (routeOptions) => {
       t.equal(routeOptions.url, '/v2/simple')
     })
@@ -629,7 +629,7 @@ test('Creates a HEAD route for a GET one with prefixTrailingSlash', async (t) =>
   const fastify = Fastify()
 
   const arr = []
-  fastify.register((instance, opts, next) => {
+  await fastify.register((instance, opts, next) => {
     instance.addHook('onRoute', (routeOptions) => {
       arr.push(`${routeOptions.method} ${routeOptions.url}`)
     })
@@ -1144,7 +1144,7 @@ test('HEAD routes properly auto created for GET routes when prefixTrailingSlash:
 
   const fastify = Fastify()
 
-  fastify.register(function routes (f, opts, next) {
+  await fastify.register(function routes (f, opts, next) {
     f.route({
       method: 'GET',
       url: '/',
@@ -1169,7 +1169,7 @@ test('HEAD routes properly auto created for GET routes when prefixTrailingSlash:
 
   const fastify = Fastify()
 
-  fastify.register(function routes (f, opts, next) {
+  await fastify.register(function routes (f, opts, next) {
     f.route({
       method: 'GET',
       url: '/',
@@ -1223,7 +1223,7 @@ test('Will not try to re-createprefixed HEAD route if it already exists and expo
 
   const fastify = Fastify({ exposeHeadRoutes: true })
 
-  fastify.register((scope, opts, next) => {
+  await fastify.register((scope, opts, next) => {
     scope.route({
       method: 'HEAD',
       path: '/route',

@@ -234,7 +234,7 @@ test('Should allow registering constrained routes in a prefixed plugin', t => {
 
   const fastify = Fastify()
 
-  fastify.register(async (scope, opts) => {
+  await fastify.register(async (scope, opts) => {
     scope.route({
       method: 'GET',
       constraints: { host: 'fastify.io' },
@@ -334,7 +334,7 @@ test('Will not try to re-createprefixed HEAD route if it already exists and expo
 
   const fastify = Fastify({ exposeHeadRoutes: true })
 
-  fastify.register((scope, opts, next) => {
+  await fastify.register((scope, opts, next) => {
     scope.route({
       method: 'HEAD',
       path: '/route',
@@ -366,7 +366,7 @@ test('allows separate constrained and unconstrained HEAD routes', async (t) => {
 
   const fastify = Fastify({ exposeHeadRoutes: true })
 
-  fastify.register((scope, opts, next) => {
+  await fastify.register((scope, opts, next) => {
     scope.route({
       method: 'HEAD',
       path: '/route',

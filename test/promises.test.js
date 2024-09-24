@@ -20,46 +20,71 @@ const opts = {
   }
 }
 
-fastify.get('/return', opts, function (req, reply) {
-  const promise = new Promise((resolve, reject) => {
-    resolve({ hello: 'world' })
-  })
-  return promise
-})
+fastify.register((instance, opts, done) => {
+  instance.get('/return', opts, function (req, reply) {
+    const promise = new Promise((resolve, reject) => {
+      resolve({ hello: 'world' })
+    })
+    return promise
+  });
 
-fastify.get('/return-error', opts, function (req, reply) {
-  const promise = new Promise((resolve, reject) => {
-    reject(new Error('some error'))
-  })
-  return promise
-})
+  done();
+});
 
-fastify.get('/double', function (req, reply) {
-  setTimeout(function () {
-    // this should not throw
-    reply.send({ hello: 'world' })
-  }, 20)
-  return Promise.resolve({ hello: '42' })
-})
+fastify.register((instance, opts, done) => {
+  instance.get('/return-error', opts, function (req, reply) {
+    const promise = new Promise((resolve, reject) => {
+      reject(new Error('some error'))
+    })
+    return promise
+  });
 
-fastify.get('/thenable', opts, function (req, reply) {
-  setImmediate(function () {
-    reply.send({ hello: 'world' })
-  })
-  return reply
-})
+  done();
+});
 
-fastify.get('/thenable-error', opts, function (req, reply) {
-  setImmediate(function () {
-    reply.send(new Error('kaboom'))
-  })
-  return reply
-})
+fastify.register((instance, opts, done) => {
+  instance.get('/double', function (req, reply) {
+    setTimeout(function () {
+      // this should not throw
+      reply.send({ hello: 'world' })
+    }, 20)
+    return Promise.resolve({ hello: '42' })
+  });
 
-fastify.get('/return-reply', opts, function (req, reply) {
-  return reply.send({ hello: 'world' })
-})
+  done();
+});
 
+fastify.register((instance, opts, done) => {
+  instance.get('/thenable', opts, function (req, reply) {
+    setImmediate(function () {
+      reply.send({ hello: 'world' })
+    })
+    return reply
+  });
+
+  done();
+});
+
+fastify.register((instance, opts, done) => {
+  instance.get('/thenable-error', opts, function (req, reply) {
+    setImmediate(function () {
+      reply.send(new Error('kaboom'))
+    })
+    return reply
+  });
+
+  done();
+});
+
+fastify.register((instance, opts, done) => {
+  instance.get('/return-reply', opts, function (req, reply) {
+    return reply.send({ hello: 'world' })
+  });
+
+  done();
+});
+
+// A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
 fastify.listen(0, err => {
   t.error(err)
   fastify.server.unref()

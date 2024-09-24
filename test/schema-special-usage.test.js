@@ -510,7 +510,7 @@ test('setSchemaController in a plugin', t => {
   ajvInstance.addSchema(refSchema)
 
   const fastify = Fastify()
-  fastify.register(schemaPlugin)
+  await fastify.register(schemaPlugin)
   fastify.get('/', {
     schema: {
       query: ajvInstance.getSchema('urn:schema:ref').schema,
@@ -615,11 +615,11 @@ test('only response schema trigger AJV pollution', async t => {
     schema: { response: { 200: S.ref('ListSchema#') } }
   }
 
-  fastify.register(
+  await fastify.register(
     async (app) => { app.get('/resource/', routeResponseSchemas, () => ({})) },
     { prefix: '/prefix1' }
   )
-  fastify.register(
+  await fastify.register(
     async (app) => { app.get('/resource/', routeResponseSchemas, () => ({})) },
     { prefix: '/prefix2' }
   )
@@ -642,11 +642,11 @@ test('only response schema trigger AJV pollution #2', async t => {
     }
   }
 
-  fastify.register(
+  await fastify.register(
     async (app) => { app.get('/resource/', routeResponseSchemas, () => ({})) },
     { prefix: '/prefix1' }
   )
-  fastify.register(
+  await fastify.register(
     async (app) => { app.get('/resource/', routeResponseSchemas, () => ({})) },
     { prefix: '/prefix2' }
   )
@@ -680,7 +680,7 @@ test('setSchemaController in a plugin with head routes', t => {
   ajvInstance.addSchema(refSchema)
 
   const fastify = Fastify({ exposeHeadRoutes: true })
-  fastify.register(schemaPlugin)
+  await fastify.register(schemaPlugin)
   fastify.get('/', {
     schema: {
       query: ajvInstance.getSchema('urn:schema:ref').schema,

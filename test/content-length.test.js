@@ -143,13 +143,17 @@ test('custom 400 with wrong content-length', t => {
 test('#2214 - wrong content-length', t => {
   const fastify = Fastify()
 
-  fastify.get('/', async () => {
-    const error = new Error('MY_ERROR_MESSAGE')
-    error.headers = {
-      'content-length': 2
-    }
-    throw error
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', async () => {
+      const error = new Error('MY_ERROR_MESSAGE')
+      error.headers = {
+        'content-length': 2
+      }
+      throw error
+    });
+
+    done();
+  });
 
   fastify.inject({
     method: 'GET',
@@ -168,13 +172,17 @@ test('#2543 - wrong content-length with errorHandler', t => {
     reply.code(500).send({ message: 'longer than 2 bytes' })
   })
 
-  fastify.get('/', async () => {
-    const error = new Error('MY_ERROR_MESSAGE')
-    error.headers = {
-      'content-length': 2
-    }
-    throw error
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', async () => {
+      const error = new Error('MY_ERROR_MESSAGE')
+      error.headers = {
+        'content-length': 2
+      }
+      throw error
+    });
+
+    done();
+  });
 
   fastify.inject({
     method: 'GET',

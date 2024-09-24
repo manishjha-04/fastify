@@ -10,7 +10,10 @@ test('should fail if defaultRoute is not a function', t => {
   const fastify = Fastify()
   const defaultRoute = {}
 
-  fastify.get('/', () => {})
+  fastify.register((instance, opts, done) => {
+    instance.get('/', () => {});
+    done();
+  });
 
   try {
     fastify.setDefaultRoute(defaultRoute)
@@ -31,7 +34,10 @@ test('correctly sets, returns, and calls defaultRoute', t => {
   const returnedDefaultRoute = fastify.getDefaultRoute()
   t.equal(returnedDefaultRoute, defaultRoute)
 
-  fastify.get('/', () => {})
+  fastify.register((instance, opts, done) => {
+    instance.get('/', () => {});
+    done();
+  });
 
   fastify.inject({
     method: 'GET',

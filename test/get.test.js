@@ -93,9 +93,13 @@ const headersSchema = {
 test('shorthand - get', t => {
   t.plan(1)
   try {
-    fastify.get('/', schema, function (req, reply) {
-      reply.code(200).send({ hello: 'world' })
-    })
+    fastify.register((instance, opts, done) => {
+      instance.get('/', schema, function (req, reply) {
+        reply.code(200).send({ hello: 'world' })
+      });
+
+      done();
+    });
     t.pass()
   } catch (e) {
     t.fail()
@@ -105,9 +109,13 @@ test('shorthand - get', t => {
 test('shorthand - get (return null)', t => {
   t.plan(1)
   try {
-    fastify.get('/null', nullSchema, function (req, reply) {
-      reply.code(200).send(null)
-    })
+    fastify.register((instance, opts, done) => {
+      instance.get('/null', nullSchema, function (req, reply) {
+        reply.code(200).send(null)
+      });
+
+      done();
+    });
     t.pass()
   } catch (e) {
     t.fail()
@@ -117,9 +125,13 @@ test('shorthand - get (return null)', t => {
 test('shorthand - get params', t => {
   t.plan(1)
   try {
-    fastify.get('/params/:foo/:test', paramsSchema, function (req, reply) {
-      reply.code(200).send(req.params)
-    })
+    fastify.register((instance, opts, done) => {
+      instance.get('/params/:foo/:test', paramsSchema, function (req, reply) {
+        reply.code(200).send(req.params)
+      });
+
+      done();
+    });
     t.pass()
   } catch (e) {
     t.fail()
@@ -129,9 +141,13 @@ test('shorthand - get params', t => {
 test('shorthand - get, querystring schema', t => {
   t.plan(1)
   try {
-    fastify.get('/query', querySchema, function (req, reply) {
-      reply.code(200).send(req.query)
-    })
+    fastify.register((instance, opts, done) => {
+      instance.get('/query', querySchema, function (req, reply) {
+        reply.code(200).send(req.query)
+      });
+
+      done();
+    });
     t.pass()
   } catch (e) {
     t.fail()
@@ -141,9 +157,13 @@ test('shorthand - get, querystring schema', t => {
 test('shorthand - get, headers schema', t => {
   t.plan(1)
   try {
-    fastify.get('/headers', headersSchema, function (req, reply) {
-      reply.code(200).send(req.headers)
-    })
+    fastify.register((instance, opts, done) => {
+      instance.get('/headers', headersSchema, function (req, reply) {
+        reply.code(200).send(req.headers)
+      });
+
+      done();
+    });
     t.pass()
   } catch (e) {
     t.fail()
@@ -153,9 +173,13 @@ test('shorthand - get, headers schema', t => {
 test('missing schema - get', t => {
   t.plan(1)
   try {
-    fastify.get('/missing', function (req, reply) {
-      reply.code(200).send({ hello: 'world' })
-    })
+    fastify.register((instance, opts, done) => {
+      instance.get('/missing', function (req, reply) {
+        reply.code(200).send({ hello: 'world' })
+      });
+
+      done();
+    });
     t.pass()
   } catch (e) {
     t.fail()
@@ -170,9 +194,13 @@ test('custom serializer - get', t => {
   }
 
   try {
-    fastify.get('/custom-serializer', numberSchema, function (req, reply) {
-      reply.code(200).serializer(customSerializer).send({ hello: 'world' })
-    })
+    fastify.register((instance, opts, done) => {
+      instance.get('/custom-serializer', numberSchema, function (req, reply) {
+        reply.code(200).serializer(customSerializer).send({ hello: 'world' })
+      });
+
+      done();
+    });
     t.pass()
   } catch (e) {
     t.fail()
@@ -182,9 +210,13 @@ test('custom serializer - get', t => {
 test('empty response', t => {
   t.plan(1)
   try {
-    fastify.get('/empty', function (req, reply) {
-      reply.code(200).send()
-    })
+    fastify.register((instance, opts, done) => {
+      instance.get('/empty', function (req, reply) {
+        reply.code(200).send()
+      });
+
+      done();
+    });
     t.pass()
   } catch (e) {
     t.fail()
@@ -194,15 +226,20 @@ test('empty response', t => {
 test('send a falsy boolean', t => {
   t.plan(1)
   try {
-    fastify.get('/boolean', function (req, reply) {
-      reply.code(200).send(false)
-    })
+    fastify.register((instance, opts, done) => {
+      instance.get('/boolean', function (req, reply) {
+        reply.code(200).send(false)
+      });
+
+      done();
+    });
     t.pass()
   } catch (e) {
     t.fail()
   }
 })
 
+// A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
 fastify.listen(0, err => {
   t.error(err)
   fastify.server.unref()

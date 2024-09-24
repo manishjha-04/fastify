@@ -28,6 +28,7 @@ test('bodyLimit', t => {
     reply.send({ error: 'handler should not be called' })
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, function (err) {
     t.error(err)
     fastify.server.unref()

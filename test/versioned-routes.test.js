@@ -235,6 +235,7 @@ test('Should register a versioned route', t => {
     }
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.server.unref()
@@ -268,9 +269,13 @@ test('Shorthand route declaration', t => {
   t.plan(5)
   const fastify = Fastify()
 
-  fastify.get('/', { constraints: { version: '1.2.0' } }, (req, reply) => {
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', { constraints: { version: '1.2.0' } }, (req, reply) => {
+      reply.send({ hello: 'world' })
+    });
+
+    done();
+  });
 
   fastify.inject({
     method: 'GET',
@@ -400,6 +405,7 @@ test('Bas accept version (server)', t => {
     }
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.server.unref()
@@ -438,10 +444,15 @@ test('test log stream', t => {
     }
   })
 
-  fastify.get('/', { constraints: { version: '1.2.0' } }, function (req, reply) {
-    reply.send(new Error('kaboom'))
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', { constraints: { version: '1.2.0' } }, function (req, reply) {
+      reply.send(new Error('kaboom'))
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.server.unref()

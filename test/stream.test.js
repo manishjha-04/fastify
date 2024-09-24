@@ -29,16 +29,25 @@ test('should respond with a stream', t => {
   t.plan(8)
   const fastify = Fastify()
 
-  fastify.get('/', function (req, reply) {
-    const stream = fs.createReadStream(__filename, 'utf8')
-    reply.code(200).send(stream)
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (req, reply) {
+      const stream = fs.createReadStream(__filename, 'utf8')
+      reply.code(200).send(stream)
+    });
 
-  fastify.get('/error', function (req, reply) {
-    const stream = fs.createReadStream('not-existing-file', 'utf8')
-    reply.code(200).send(stream)
-  })
+    done();
+  });
 
+  fastify.register((instance, opts, done) => {
+    instance.get('/error', function (req, reply) {
+      const stream = fs.createReadStream('not-existing-file', 'utf8')
+      reply.code(200).send(stream)
+    });
+
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.server.unref()
@@ -65,9 +74,13 @@ test('should trigger the onSend hook', t => {
   t.plan(4)
   const fastify = Fastify()
 
-  fastify.get('/', (req, reply) => {
-    reply.send(fs.createReadStream(__filename, 'utf8'))
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (req, reply) => {
+      reply.send(fs.createReadStream(__filename, 'utf8'))
+    });
+
+    done();
+  });
 
   fastify.addHook('onSend', (req, reply, payload, done) => {
     t.ok(payload._readableState)
@@ -89,9 +102,13 @@ test('should trigger the onSend hook only twice if pumping the stream fails, fir
   t.plan(5)
   const fastify = Fastify()
 
-  fastify.get('/', (req, reply) => {
-    reply.send(fs.createReadStream('not-existing-file', 'utf8'))
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (req, reply) => {
+      reply.send(fs.createReadStream('not-existing-file', 'utf8'))
+    });
+
+    done();
+  });
 
   let counter = 0
   fastify.addHook('onSend', (req, reply, payload, done) => {
@@ -105,6 +122,7 @@ test('should trigger the onSend hook only twice if pumping the stream fails, fir
     done()
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
 
@@ -121,9 +139,13 @@ test('onSend hook stream', t => {
   t.plan(4)
   const fastify = Fastify()
 
-  fastify.get('/', function (req, reply) {
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (req, reply) {
+      reply.send({ hello: 'world' })
+    });
+
+    done();
+  });
 
   fastify.addHook('onSend', (req, reply, payload, done) => {
     const gzStream = zlib.createGzip()
@@ -177,9 +199,13 @@ test('onSend hook stream should work even if payload is not a proper stream', t 
   }
 
   const fastify = Fastify({ logger: spyLogger })
-  fastify.get('/', function (req, reply) {
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (req, reply) {
+      reply.send({ hello: 'world' })
+    });
+
+    done();
+  });
   fastify.addHook('onSend', (req, reply, payload, done) => {
     const fakeStream = { pipe: () => { } }
     done(null, fakeStream)
@@ -206,9 +232,13 @@ test('onSend hook stream should work on payload with "close" ending function', t
   })
 
   const fastify = Fastify({ logger: false })
-  fastify.get('/', function (req, reply) {
-    reply.send({ hello: 'world' })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (req, reply) {
+      reply.send({ hello: 'world' })
+    });
+
+    done();
+  });
   fastify.addHook('onSend', (req, reply, payload, done) => {
     const fakeStream = {
       pipe: () => { },
@@ -252,22 +282,27 @@ test('Destroying streams prematurely', t => {
     }
   })
 
-  fastify.get('/', function (request, reply) {
-    t.pass('Received request')
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (request, reply) {
+      t.pass('Received request')
 
-    let sent = false
-    const reallyLongStream = new stream.Readable({
-      read: function () {
-        if (!sent) {
-          this.push(Buffer.from('hello\n'))
+      let sent = false
+      const reallyLongStream = new stream.Readable({
+        read: function () {
+          if (!sent) {
+            this.push(Buffer.from('hello\n'))
+          }
+          sent = true
         }
-        sent = true
-      }
-    })
+      })
 
-    reply.send(reallyLongStream)
-  })
+      reply.send(reallyLongStream)
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.server.unref()
@@ -314,23 +349,28 @@ test('Destroying streams prematurely should call close method', t => {
     }
   })
 
-  fastify.get('/', function (request, reply) {
-    t.pass('Received request')
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (request, reply) {
+      t.pass('Received request')
 
-    let sent = false
-    const reallyLongStream = new stream.Readable({
-      read: function () {
-        if (!sent) {
-          this.push(Buffer.from('hello\n'))
+      let sent = false
+      const reallyLongStream = new stream.Readable({
+        read: function () {
+          if (!sent) {
+            this.push(Buffer.from('hello\n'))
+          }
+          sent = true
         }
-        sent = true
-      }
-    })
-    reallyLongStream.destroy = undefined
-    reallyLongStream.close = () => t.ok('called')
-    reply.send(reallyLongStream)
-  })
+      })
+      reallyLongStream.destroy = undefined
+      reallyLongStream.close = () => t.ok('called')
+      reply.send(reallyLongStream)
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.server.unref()
@@ -376,23 +416,28 @@ test('Destroying streams prematurely should call close method when destroy is no
     }
   })
 
-  fastify.get('/', function (request, reply) {
-    t.pass('Received request')
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (request, reply) {
+      t.pass('Received request')
 
-    let sent = false
-    const reallyLongStream = new stream.Readable({
-      read: function () {
-        if (!sent) {
-          this.push(Buffer.from('hello\n'))
+      let sent = false
+      const reallyLongStream = new stream.Readable({
+        read: function () {
+          if (!sent) {
+            this.push(Buffer.from('hello\n'))
+          }
+          sent = true
         }
-        sent = true
-      }
-    })
-    reallyLongStream.destroy = true
-    reallyLongStream.close = () => t.ok('called')
-    reply.send(reallyLongStream)
-  })
+      })
+      reallyLongStream.destroy = true
+      reallyLongStream.close = () => t.ok('called')
+      reply.send(reallyLongStream)
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.server.unref()
@@ -438,24 +483,29 @@ test('Destroying streams prematurely should call abort method', t => {
     }
   })
 
-  fastify.get('/', function (request, reply) {
-    t.pass('Received request')
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (request, reply) {
+      t.pass('Received request')
 
-    let sent = false
-    const reallyLongStream = new stream.Readable({
-      read: function () {
-        if (!sent) {
-          this.push(Buffer.from('hello\n'))
+      let sent = false
+      const reallyLongStream = new stream.Readable({
+        read: function () {
+          if (!sent) {
+            this.push(Buffer.from('hello\n'))
+          }
+          sent = true
         }
-        sent = true
-      }
-    })
-    reallyLongStream.destroy = undefined
-    reallyLongStream.close = undefined
-    reallyLongStream.abort = () => t.ok('called')
-    reply.send(reallyLongStream)
-  })
+      })
+      reallyLongStream.destroy = undefined
+      reallyLongStream.close = undefined
+      reallyLongStream.abort = () => t.ok('called')
+      reply.send(reallyLongStream)
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.server.unref()
@@ -489,23 +539,28 @@ test('Destroying streams prematurely, log is disabled', t => {
   const stream = require('stream')
   const http = require('http')
 
-  fastify.get('/', function (request, reply) {
-    reply.log[kDisableRequestLogging] = true
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (request, reply) {
+      reply.log[kDisableRequestLogging] = true
 
-    let sent = false
-    const reallyLongStream = new stream.Readable({
-      read: function () {
-        if (!sent) {
-          this.push(Buffer.from('hello\n'))
+      let sent = false
+      const reallyLongStream = new stream.Readable({
+        read: function () {
+          if (!sent) {
+            this.push(Buffer.from('hello\n'))
+          }
+          sent = true
         }
-        sent = true
-      }
-    })
-    reallyLongStream.destroy = true
-    reallyLongStream.close = () => t.ok('called')
-    reply.send(reallyLongStream)
-  })
+      })
+      reallyLongStream.destroy = true
+      reallyLongStream.close = () => t.ok('called')
+      reply.send(reallyLongStream)
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.server.unref()
@@ -529,13 +584,18 @@ test('should respond with a stream1', t => {
   t.plan(5)
   const fastify = Fastify()
 
-  fastify.get('/', function (req, reply) {
-    const stream = JSONStream.stringify()
-    reply.code(200).type('application/json').send(stream)
-    stream.write({ hello: 'world' })
-    stream.end({ a: 42 })
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (req, reply) {
+      const stream = JSONStream.stringify()
+      reply.code(200).type('application/json').send(stream)
+      stream.write({ hello: 'world' })
+      stream.end({ a: 42 })
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.server.unref()
@@ -554,20 +614,25 @@ test('return a 404 if the stream emits a 404 error', t => {
 
   const fastify = Fastify()
 
-  fastify.get('/', function (request, reply) {
-    t.pass('Received request')
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (request, reply) {
+      t.pass('Received request')
 
-    const reallyLongStream = new Readable({
-      read: function () {
-        setImmediate(() => {
-          this.emit('error', new errors.NotFound())
-        })
-      }
-    })
+      const reallyLongStream = new Readable({
+        read: function () {
+          setImmediate(() => {
+            this.emit('error', new errors.NotFound())
+          })
+        }
+      })
 
-    reply.send(reallyLongStream)
-  })
+      reply.send(reallyLongStream)
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.server.unref()
@@ -586,16 +651,25 @@ test('should support send module 200 and 404', { only: true }, t => {
   t.plan(8)
   const fastify = Fastify()
 
-  fastify.get('/', function (req, reply) {
-    const stream = send(req.raw, __filename)
-    reply.code(200).send(stream)
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', function (req, reply) {
+      const stream = send(req.raw, __filename)
+      reply.code(200).send(stream)
+    });
 
-  fastify.get('/error', function (req, reply) {
-    const stream = send(req.raw, 'non-existing-file')
-    reply.code(200).send(stream)
-  })
+    done();
+  });
 
+  fastify.register((instance, opts, done) => {
+    instance.get('/error', function (req, reply) {
+      const stream = send(req.raw, 'non-existing-file')
+      reply.code(200).send(stream)
+    });
+
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.server.unref()
@@ -625,18 +699,23 @@ test('should destroy stream when response is ended', t => {
   const stream = require('stream')
   const fastify = Fastify()
 
-  fastify.get('/error', function (req, reply) {
-    const reallyLongStream = new stream.Readable({
-      read: function () {},
-      destroy: function (err, callback) {
-        t.ok('called')
-        callback(err)
-      }
-    })
-    reply.code(200).send(reallyLongStream)
-    reply.raw.end(Buffer.from('hello\n'))
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/error', function (req, reply) {
+      const reallyLongStream = new stream.Readable({
+        read: function () {},
+        destroy: function (err, callback) {
+          t.ok('called')
+          callback(err)
+        }
+      })
+      reply.code(200).send(reallyLongStream)
+      reply.raw.end(Buffer.from('hello\n'))
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, err => {
     t.error(err)
     fastify.server.unref()
@@ -669,10 +748,14 @@ test('should mark reply as sent before pumping the payload stream into response 
 
   const fastify = Fastify()
 
-  fastify.get('/', async function (req, reply) {
-    const stream = fs.createReadStream(__filename, 'utf8')
-    reply.code(200).send(stream)
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', async function (req, reply) {
+      const stream = fs.createReadStream(__filename, 'utf8')
+      reply.code(200).send(stream)
+    });
+
+    done();
+  });
 
   fastify.inject({
     url: '/',
@@ -703,17 +786,22 @@ test('reply.send handles aborted requests', t => {
     logger: spyLogger
   })
 
-  fastify.get('/', (req, reply) => {
-    setTimeout(() => {
-      const stream = new Readable({
-        read: function () {
-          this.push(null)
-        }
-      })
-      reply.send(stream)
-    }, 6)
-  })
+  fastify.register((instance, opts, done) => {
+    instance.get('/', (req, reply) => {
+      setTimeout(() => {
+        const stream = new Readable({
+          read: function () {
+            this.push(null)
+          }
+        })
+        reply.send(stream)
+      }, 6)
+    });
 
+    done();
+  });
+
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen({ port: 0 }, err => {
     t.error(err)
     fastify.server.unref()

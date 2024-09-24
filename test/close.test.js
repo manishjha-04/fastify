@@ -28,7 +28,7 @@ test('close callback', t => {
 test('inside register', t => {
   t.plan(5)
   const fastify = Fastify()
-  fastify.register(function (f, opts, done) {
+  await fastify.register(function (f, opts, done) {
     f.addHook('onClose', onClose)
     function onClose (instance, done) {
       t.ok(instance.prototype === fastify.prototype)
@@ -54,7 +54,7 @@ test('close order', t => {
   const fastify = Fastify()
   const order = [1, 2, 3]
 
-  fastify.register(function (f, opts, done) {
+  await fastify.register(function (f, opts, done) {
     f.addHook('onClose', (instance, done) => {
       t.equal(order.shift(), 1)
       done()
@@ -83,7 +83,7 @@ test('close order - async', async t => {
   const fastify = Fastify()
   const order = [1, 2, 3]
 
-  fastify.register(function (f, opts, done) {
+  await fastify.register(function (f, opts, done) {
     f.addHook('onClose', async instance => {
       t.equal(order.shift(), 1)
     })
@@ -118,7 +118,7 @@ test('should not throw an error if the server is not listening', t => {
 test('onClose should keep the context', t => {
   t.plan(4)
   const fastify = Fastify()
-  fastify.register(plugin)
+  await fastify.register(plugin)
 
   function plugin (instance, opts, done) {
     instance.decorate('test', true)

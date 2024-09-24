@@ -692,7 +692,7 @@ test('plugin override', t => {
     }
   })
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     instance.setSchemaErrorFormatter((errors, dataVar) => {
       return new Error('C')
     })

@@ -79,7 +79,7 @@ test('errorHandler in plugin should be separate from the external one', async t 
   t.plan(4)
   const fastify = Fastify()
 
-  fastify.register((instance, opts, done) => {
+  await fastify.register((instance, opts, done) => {
     const inPluginErrHandler = (_, __, reply) => {
       reply.send({ plugin: 'error-object' })
     }

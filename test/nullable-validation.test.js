@@ -90,6 +90,7 @@ test('object or null body', t => {
     }
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, (err) => {
     fastify.server.unref()
     t.error(err)
@@ -144,6 +145,7 @@ test('nullable body', t => {
     }
   })
 
+  // A HEAD request to the /example endpoint will automatically respond with the same headers as the GET request.
   fastify.listen(0, (err) => {
     fastify.server.unref()
     t.error(err)
